@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "rocketpool.fullname" . }}-smartnode
+  labels:
+    app.kubernetes.io/component: smartnode
+    app.kubernetes.io/name: smartnode
+    app.kubernetes.io/part-of: rocketpool
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: smartnode
+      app.kubernetes.io/name: smartnode
+      app.kubernetes.io/part-of: rocketpool
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: smartnode
+        app.kubernetes.io/name: smartnode
+        app.kubernetes.io/part-of: rocketpool
+    spec:
+      serviceAccountName: smartnode
+      containers:
+        - name: smartnode
+          image: "{{ .Values.smartNode.image.repository }}:v{{ .Values.smartNode.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: IfNotPresent
+          args:
+            - --metricsAddress
+            - 0.0.0.0
+            - --metricsPort
+            - '9102'
+            - --settings
+            - /config/user-settings.yaml
+            - node
+          lifecycle:
+            postStart:
+              exec:
+                command:
+                  - /bin/sh
+                  - -c
+                  - apt update && apt install -y curl
+          ports:
+            - name: metrics
+              containerPort: 9102
+              protocol: TCP
+          volumeMounts:
+            - name: config
+              mountPath: /config
+            - name: data
+              mountPath: /.rocketpool
+            - name: scripts
+              mountPath: /scripts
+              readOnly: true
+      restartPolicy: Always
+      volumes:
+        - name: config
+          configMap:
+            defaultMode: 420
+            name: smartnode-config
+        - name: data
+          persistentVolumeClaim:
+            claimName: smartnode-data
+        - name: scripts
+          configMap:
+            defaultMode: 0755
+            name: smartnode-scripts

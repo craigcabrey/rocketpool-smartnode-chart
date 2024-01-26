@@ -1,0 +1,98 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: smartnode-config
+data:
+  user-settings.yaml: |
+    # TODO: Use init container to inject credentials from
+    # a secret.
+    addons-rescue-node:
+      enabled: "{{ .Values.rocketPool.rescueNode.enabled }}"
+      username: {{ .Values.rocketPool.rescueNode.username }}
+      password: {{ .Values.rocketPool.rescueNode.password }}
+    bitflyNodeMetrics:
+      bitflyEndpoint: {{ .Values.rocketPool.bitflyNodeMetrics.bitflyEndpoint }}
+      bitflyMachineName: {{ .Values.rocketPool.bitflyNodeMetrics.bitflyMachineName }}
+      bitflySecret: {{ .Values.rocketPool.bitflyNodeMetrics.bitflySecret }}
+    consensusCommon:
+      apiPort: "5052"
+      checkpointSyncUrl: ""
+      doppelgangerDetection: "true"
+      graffiti: ""
+      openApiPort: closed
+      p2pPort: "9001"
+    executionCommon:
+      enginePort: "8551"
+      ethstatsLabel: ""
+      ethstatsLogin: ""
+      httpPort: "8545"
+      openRpcPorts: closed
+      p2pPort: "30303"
+      wsPort: "8546"
+    fallbackNormal:
+      ccHttpUrl: ""
+      ecHttpUrl: ""
+    fallbackPrysm:
+      ccHttpUrl: ""
+      ecHttpUrl: ""
+      jsonRpcUrl: ""
+    mevBoost:
+      additionalFlags: ""
+      aestusEnabled: "false"
+      bloxRouteMaxProfitEnabled: "false"
+      bloxRouteRegulatedEnabled: "false"
+      edenEnabled: "false"
+      enableRegulatedAllMev: "false"
+      enableUnregulatedAllMev: "false"
+      externalUrl: ""
+      flashbotsEnabled: "false"
+      mode: external
+      openRpcPort: closed
+      port: "18550"
+      selectionMode: profile
+      ultrasoundEnabled: "false"
+    native:
+      ccHttpUrl: http://{{ .Release.Name }}-beacon:5052
+      # FIXME
+      consensusClient: lighthouse
+      ecHttpUrl: http://{{ .Release.Name }}-execution:8545
+      validatorRestartCommand: /scripts/restart-validator.sh
+      validatorStopCommand: /scripts/stop-validator.sh
+    root:
+      bnMetricsPort: "9100"
+      consensusClient: nimbus
+      consensusClientMode: external
+      ecMetricsPort: "9105"
+      enableBitflyNodeMetrics: "false"
+      enableMetrics: "false"
+      enableMevBoost: "{{ .Values.rocketPool.mevBoost.enabled }}"
+      enableODaoMetrics: "false"
+      executionClient: besu
+      executionClientMode: external
+      exporterMetricsPort: "9103"
+      externalConsensusClient: lighthouse
+      isNative: "true"
+      nodeMetricsPort: "9102"
+      reconnectDelay: 60s
+      rpDir: /.rocketpool
+      useFallbackClients: "false"
+      vcMetricsPort: "9101"
+      version: v{{ .Chart.AppVersion }}
+      watchtowerMetricsPort: "9102"
+    smartnode:
+      archiveECUrl: ""
+      checkpointRetentionLimit: "200"
+      dataPath: /.rocketpool/data
+      distributeThreshold: "1"
+      manualMaxFee: "0"
+      minipoolStakeGasThreshold: "150"
+      network: {{ .Values.global.main.network }}
+      priorityFee: "2"
+      projectName: rocketpool
+      recordCheckpointInterval: "45"
+      recordsPath: /.rocketpool/data/records
+      rewardsTreeCustomUrl: ""
+      rewardsTreeMode: download
+      useRollingRecords: "false"
+      watchtowerMaxFeeOverride: "200"
+      watchtowerPrioFeeOverride: "3"

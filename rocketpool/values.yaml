@@ -1,0 +1,191 @@
+global:
+  main:
+    network: &global-network holesky
+  checkpointSync:
+    enabled: false
+
+rocketPool:
+  bitflyNodeMetrics:
+    bitflyEndpoint: https://beaconcha.in/api/v1/client/metrics
+    bitflyMachineName: Smartnode
+    bitflySecret: ""
+  rescueNode:
+    enabled: false
+    username:
+    password:
+  smoothingPool: false
+  mevBoost:
+    enabled: false
+    relays: []
+
+smartNode:
+  image:
+    repository: docker.io/rocketpool/smartnode
+    tag: ''
+
+# See documentation for options:
+# https://github.com/ethpandaops/ethereum-helm-charts
+ethereumNode:
+  # Execution Layer clients
+  besu:
+    defaultCommandTemplate: |
+      - sh
+      - -ac
+      - >
+        exec besu
+        --data-path=/data
+        --nat-method=KUBERNETES
+        --rpc-http-enabled
+        --rpc-http-host=0.0.0.0
+        --rpc-http-port={{ .Values.httpPort }}
+        --rpc-http-cors-origins=*
+        --rpc-ws-enabled
+        --rpc-ws-host=0.0.0.0
+        --rpc-ws-port={{ .Values.wsPort }}
+        --host-allowlist=*
+        --engine-jwt-secret=/data/jwt.hex
+        --engine-rpc-port={{ .Values.authPort }}
+        --engine-host-allowlist=*
+        --metrics-enabled
+        --metrics-host=0.0.0.0
+        --metrics-port={{ .Values.metricsPort }}
+      {{- range .Values.extraArgs }}
+        {{ tpl . $ }}
+      {{- end }}
+    extraArgs:
+      - --data-storage-format=bonsai
+      - --network=holesky
+      - --sync-mode=X_SNAP
+      - --Xsnapsync-synchronizer-flat-db-healing-enabled=true
+      - --fast-sync-min-peers=3
+      - --rpc-http-max-active-connections=1024
+    rbac:
+      create: false
+    serviceAccount:
+      create: false
+  erigon:
+    rbac:
+      create: false
+    serviceAccount:
+      create: false
+  ethereumjs:
+    rbac:
+      create: false
+    serviceAccount:
+      create: false
+  geth:
+    rbac:
+      create: false
+    serviceAccount:
+      create: false
+  nethermind:
+    rbac:
+      create: false
+    serviceAccount:
+      create: false
+  reth:
+    rbac:
+      create: false
+    serviceAccount:
+      create: false
+
+  # Consensus Layer clients
+  grandine:
+    rbac:
+      create: false
+    serviceAccount:
+      create: false
+  lighthouse:
+    image:
+      tag: latest-modern
+    rbac:
+      create: false
+    serviceAccount:
+      create: false
+  lodestar:
+    rbac:
+      create: false
+    serviceAccount:
+      create: false
+  nimbus:
+    rbac:
+      create: false
+    serviceAccount:
+      create: false
+  prysm:
+    rbac:
+      create: false
+    serviceAccount:
+      create: false
+  teku:
+    rbac:
+      create: false
+    serviceAccount:
+      create: false
+
+lighthouseValidator:
+  nameOverride: lighthouse-validator
+  enabled: false
+  mode: validator
+  extraArgs:
+    - --network
+    - *global-network
+  rbac:
+    create: false
+  serviceAccount:
+    create: false
+
+prysmValidator:
+  nameOverride: prysm-validator
+  enabled: false
+  mode: validator
+  extraArgs:
+    - --network
+    - *global-network
+  rbac:
+    create: false
+  serviceAccount:
+    create: false
+ 
+networkPolicy:
+  create: false
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

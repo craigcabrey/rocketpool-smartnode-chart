@@ -1,0 +1,12 @@
+dependencies:
+- name: ethereum-node
+  repository: https://ethpandaops.github.io/ethereum-helm-charts
+  version: 0.0.23
+- name: lighthouse
+  repository: https://ethpandaops.github.io/ethereum-helm-charts
+  version: 1.1.2
+- name: prysm
+  repository: https://ethpandaops.github.io/ethereum-helm-charts
+  version: 1.1.2
+digest: sha256:8b4539313cc8782de7033b7681e4130ae346fc1074455a280781152a1a12be9d
+generated: "2024-01-25T19:23:57.916764407-06:00"

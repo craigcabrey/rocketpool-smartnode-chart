@@ -1,0 +1,43 @@
+{{- if .Values.rocketPool.mevBoost.enabled -}}
+{{- if eq .Values.global.main.network "holesky" }}
+{{- fail "The holesky network does not support mev-boost" }}
+{{- end }}
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mev-boost
+  labels:
+    app.kubernetes.io/component: mev-boost
+    app.kubernetes.io/name: mev-boost
+    app.kubernetes.io/part-of: rocketpool
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: mev-boost
+      app.kubernetes.io/name: mev-boost
+      app.kubernetes.io/part-of: rocketpool
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: mev-boost
+        app.kubernetes.io/name: mev-boost
+        app.kubernetes.io/part-of: rocketpool
+    spec:
+      containers:
+        - name: mev-boost
+          image: flashbots/mev-boost:1.6
+          imagePullPolicy: IfNotPresent
+          command:
+            - /app/mev-boost
+          args:
+            - -{{ .Values.global.main.network }}
+            - -addr=0.0.0.0:18550
+            - -relay-check
+            - -relays={{ join "," .Values.rocketPool.mevBoost.relays }}
+          ports:
+            - name: api
+              containerPort: 18550
+              protocol: TCP
+      restartPolicy: Always
+{{- end }}

@@ -1,0 +1,13 @@
+global:
+  main:
+    checkpointSync:
+      enabled: true
+
+ethereumNode:
+  besu:
+    enabled: true
+  lighthouse:
+    enabled: true
+
+lighthouseValidator:
+  enabled: true

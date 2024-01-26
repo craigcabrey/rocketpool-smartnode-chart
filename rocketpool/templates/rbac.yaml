@@ -1,0 +1,23 @@
+{{- if .Values.serviceAccount.create -}}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: smartnode
+rules:
+  - apiGroups: [""]
+    resources: ["statefulsets"]
+    verbs: ["patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: smartnode
+subjects:
+  - kind: ServiceAccount
+    name: smartnode
+    namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: Role
+  name: smartnode
+  apiGroup: rbac.authorization.k8s.io
+{{- end }}

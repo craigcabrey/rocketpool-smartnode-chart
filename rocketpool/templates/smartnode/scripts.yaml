@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: smartnode-scripts
+data:
+  restart-validator.sh: |
+    #!/bin/sh
+
+    TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
+    NAMESPACE=$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace)
+
+    curl \
+      --cacert /var/run/secrets/kubernetes.io/serviceaccount/ca.crt \
+      --header "Authorization: Bearer $TOKEN" \
+      --header "Accept: application/json, */*" \
+      --header "Content-Type: application/strategic-merge-patch+json" \
+      --request PATCH \
+      --data '{"spec":{"template":{"metadata":{"annotations":{"kubectl.kubrnetes.io/restartedAt":"'"$(date +%Y-%m-%dT%T%z)"'"}}}}}' \
+                                                                                                                          # FIXME
+      "https://$KUBERNETES_SERVICE_HOST:$KUBERNETES_SERVICE_PORT_HTTPS/api/apps/v1/namespaces/$NAMESPACE/statefulsets/{{ .Release.Name }}-lighthouse-validator"
+  stop-validator.sh: |
+    #!/bin/sh
+
+    TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
+    NAMESPACE=$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace)
+
+    curl \
+      --cacert /var/run/secrets/kubernetes.io/serviceaccount/ca.crt \
+      --header "Authorization: Bearer $TOKEN" \
+      "https://$KUBERNETES_SERVICE_HOST:$KUBERNETES_SERVICE_PORT_HTTPS/api/v1/namespaces/$NAMESPACE/services/"
