@@ -9,19 +9,42 @@ rocketPool:
     bitflyEndpoint: https://beaconcha.in/api/v1/client/metrics
     bitflyMachineName: Smartnode
     bitflySecret: ""
+  fallbackNode:
+    enabled: false
+    normal:
+      consensusEndpoint:
+      executionEndpoint:
+    prysm:
+      consensusEndpoint:
+      executionEndpoint:
+      jsonRpcEndpoint:
   rescueNode:
     enabled: false
     username:
     password:
   smoothingPool: false
-  mevBoost:
-    enabled: false
-    relays: []
+
+mevBoost:
+  enabled: false
+  relays: []
+  port: 18550
 
 smartNode:
   image:
     repository: docker.io/rocketpool/smartnode
-    tag: ''
+    tag: ""
+
+  metricsPort: 9102
+
+watchtower:
+  image:
+    repository: docker.io/rocketpool/smartnode
+    tag: ""
+
+  metricsPort: 9102
+
+  maxFeeOverride: 200
+  prioFeeOverride: 3
 
 # See documentation for options:
 # https://github.com/ethpandaops/ethereum-helm-charts
@@ -59,6 +82,13 @@ ethereumNode:
       - --Xsnapsync-synchronizer-flat-db-healing-enabled=true
       - --fast-sync-min-peers=3
       - --rpc-http-max-active-connections=1024
+
+    authPort: 8551
+    httpPort: 8545
+    metricsPort: 9545
+    p2pPort: 30303
+    wsPort: 8546
+
     rbac:
       create: false
     serviceAccount:
@@ -98,6 +128,11 @@ ethereumNode:
   lighthouse:
     image:
       tag: latest-modern
+
+    httpPort: 5052
+    metricsPort: 5054
+    p2pPort: 9001
+
     rbac:
       create: false
     serviceAccount:
@@ -134,6 +169,9 @@ lighthouseValidator:
     create: false
   serviceAccount:
     create: false
+
+  # FIXME: maybe use default
+  metricsPort: 9101
 
 prysmValidator:
   nameOverride: prysm-validator

@@ -27,8 +27,7 @@ spec:
           args:
             - --metricsAddress
             - 0.0.0.0
-            - --metricsPort
-            - '9102'
+            - --metricsPort={{ .Values.smartNode.metricsPort }}
             - --settings
             - /config/user-settings.yaml
             - node
@@ -41,13 +40,13 @@ spec:
                   - apt update && apt install -y curl
           ports:
             - name: metrics
-              containerPort: 9102
+              containerPort: {{ .Values.smartNode.metricsPort }}
               protocol: TCP
           volumeMounts:
             - name: config
               mountPath: /config
             - name: data
-              mountPath: /.rocketpool
+              mountPath: /data
             - name: scripts
               mountPath: /scripts
               readOnly: true

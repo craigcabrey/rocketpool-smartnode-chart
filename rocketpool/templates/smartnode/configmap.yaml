@@ -4,10 +4,9 @@ metadata:
   name: smartnode-config
 data:
   user-settings.yaml: |
-    # TODO: Use init container to inject credentials from
-    # a secret.
+    # FIXME: Use init container to inject credentials from a secret.
     addons-rescue-node:
-      enabled: "{{ .Values.rocketPool.rescueNode.enabled }}"
+      enabled: {{ .Values.rocketPool.rescueNode.enabled }}
       username: {{ .Values.rocketPool.rescueNode.username }}
       password: {{ .Values.rocketPool.rescueNode.password }}
     bitflyNodeMetrics:
@@ -15,74 +14,75 @@ data:
       bitflyMachineName: {{ .Values.rocketPool.bitflyNodeMetrics.bitflyMachineName }}
       bitflySecret: {{ .Values.rocketPool.bitflyNodeMetrics.bitflySecret }}
     consensusCommon:
-      apiPort: "5052"
+      apiPort: {{ include "rocketpool.consensusClient.httpPort" . }}
+      # FIXME
       checkpointSyncUrl: ""
-      doppelgangerDetection: "true"
+      # FIXME
+      doppelgangerDetection: true
       graffiti: ""
       openApiPort: closed
-      p2pPort: "9001"
+      p2pPort: {{ include "rocketpool.consensusClient.p2pPort" . }}
     executionCommon:
-      enginePort: "8551"
+      enginePort: {{ include "rocketpool.executionClient.enginePort" . }}
       ethstatsLabel: ""
       ethstatsLogin: ""
-      httpPort: "8545"
+      httpPort: {{ include "rocketpool.executionClient.httpPort" . }}
       openRpcPorts: closed
-      p2pPort: "30303"
-      wsPort: "8546"
+      p2pPort: {{ include "rocketpool.executionClient.p2pPort" . }}
+      wsPort: {{ include "rocketpool.executionClient.wsPort" . }}
     fallbackNormal:
-      ccHttpUrl: ""
-      ecHttpUrl: ""
+      ccHttpUrl: {{ .Values.rocketPool.fallbackNode.normal.consensusEndpoint }}
+      ecHttpUrl: {{ .Values.rocketPool.fallbackNode.normal.executionEndpoint }}
     fallbackPrysm:
-      ccHttpUrl: ""
-      ecHttpUrl: ""
-      jsonRpcUrl: ""
+      ccHttpUrl: {{ .Values.rocketPool.fallbackNode.prysm.consensusEndpoint }}
+      ecHttpUrl: {{ .Values.rocketPool.fallbackNode.prysm.executionEndpoint }}
+      jsonRpcUrl: {{ .Values.rocketPool.fallbackNode.prysm.jsonRpcEndpoint }}
     mevBoost:
       additionalFlags: ""
-      aestusEnabled: "false"
-      bloxRouteMaxProfitEnabled: "false"
-      bloxRouteRegulatedEnabled: "false"
-      edenEnabled: "false"
-      enableRegulatedAllMev: "false"
-      enableUnregulatedAllMev: "false"
+      aestusEnabled: false
+      bloxRouteMaxProfitEnabled: false
+      bloxRouteRegulatedEnabled: false
+      edenEnabled: false
+      enableRegulatedAllMev: false
+      enableUnregulatedAllMev: false
       externalUrl: ""
-      flashbotsEnabled: "false"
+      flashbotsEnabled: false
       mode: external
       openRpcPort: closed
-      port: "18550"
+      port: {{ .Values.mevBoost.port }}
       selectionMode: profile
-      ultrasoundEnabled: "false"
+      ultrasoundEnabled: false
     native:
-      ccHttpUrl: http://{{ .Release.Name }}-beacon:5052
-      # FIXME
-      consensusClient: lighthouse
-      ecHttpUrl: http://{{ .Release.Name }}-execution:8545
+      ccHttpUrl: http://{{ .Release.Name }}-beacon:{{ include "rocketpool.consensusClient.httpPort" . }}
+      consensusClient: {{ include "rocketpool.consensusClient" . }}
+      ecHttpUrl: http://{{ .Release.Name }}-execution:{{ include "rocketpool.executionClient.httpPort" . }}
       validatorRestartCommand: /scripts/restart-validator.sh
       validatorStopCommand: /scripts/stop-validator.sh
     root:
-      bnMetricsPort: "9100"
-      consensusClient: nimbus
+      bnMetricsPort: {{ include "rocketpool.consensusClient.metricsPort" . }}
+      consensusClient: {{ include "rocketpool.consensusClient" . }}
       consensusClientMode: external
-      ecMetricsPort: "9105"
-      enableBitflyNodeMetrics: "false"
-      enableMetrics: "false"
-      enableMevBoost: "{{ .Values.rocketPool.mevBoost.enabled }}"
-      enableODaoMetrics: "false"
-      executionClient: besu
+      ecMetricsPort: {{ include "rocketpool.executionClient.metricsPort" . }}
+      enableBitflyNodeMetrics: false
+      enableMetrics: false
+      enableMevBoost: {{ .Values.mevBoost.enabled }}
+      enableODaoMetrics: false
+      consensusClient: {{ include "rocketpool.executionClient" . }}
       executionClientMode: external
       exporterMetricsPort: "9103"
-      externalConsensusClient: lighthouse
-      isNative: "true"
-      nodeMetricsPort: "9102"
+      externalConsensusClient: {{ include "rocketpool.consensusClient" . }}
+      isNative: true
+      nodeMetricsPort: {{ .Values.smartNode.metricsPort }}
       reconnectDelay: 60s
-      rpDir: /.rocketpool
-      useFallbackClients: "false"
-      vcMetricsPort: "9101"
+      rpDir: /data
+      useFallbackClients: {{ .Values.rocketPool.fallbackNode.enabled }}
+      vcMetricsPort: {{ include "rocketpool.validatorClient.metricsPort" . }}
       version: v{{ .Chart.AppVersion }}
-      watchtowerMetricsPort: "9102"
+      watchtowerMetricsPort: {{ .Values.watchtower.metricsPort }}
     smartnode:
       archiveECUrl: ""
       checkpointRetentionLimit: "200"
-      dataPath: /.rocketpool/data
+      dataPath: /data/data
       distributeThreshold: "1"
       manualMaxFee: "0"
       minipoolStakeGasThreshold: "150"
@@ -90,9 +90,9 @@ data:
       priorityFee: "2"
       projectName: rocketpool
       recordCheckpointInterval: "45"
-      recordsPath: /.rocketpool/data/records
+      recordsPath: /data/data/records
       rewardsTreeCustomUrl: ""
       rewardsTreeMode: download
-      useRollingRecords: "false"
-      watchtowerMaxFeeOverride: "200"
-      watchtowerPrioFeeOverride: "3"
+      useRollingRecords: false
+      watchtowerMaxFeeOverride: {{ .Values.watchtower.maxFeeOverride }}
+      watchtowerPrioFeeOverride: {{ .Values.watchtower.prioFeeOverride }}

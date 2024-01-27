@@ -31,19 +31,18 @@ spec:
           args:
             - --metricsAddress
             - 0.0.0.0
-            - --metricsPort
-            - '9102'
+            - --metricsPort={{ .Values.watchtower.metricsPort }}
             - --settings
             - /config/user-settings.yaml
             - watchtower
           ports:
             - name: metrics
-              containerPort: 9102
+              containerPort: {{ .Values.watchtower.metricsPort }}
               protocol: TCP
           volumeMounts:
             - mountPath: /config
               name: config
-            - mountPath: /.rocketpool
+            - mountPath: /data
               name: data
       restartPolicy: Always
       volumes:

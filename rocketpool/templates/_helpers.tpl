@@ -60,25 +60,3 @@ Create the name of the service account to use
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
 {{- end }}
-
-{{- define "rocketpool.validator" -}}
-{{- if .Values.lighthouseValidator.enabled -}}
-{{- default "lighthouse" }}
-{{- end -}}
-{{- end -}}
-
-{{- $vlCount := 0 | int -}}
-{{- if .Values.lighthouseValidator.enabled -}}
-{{ $vlCount = add1 $vlCount -}}
-{{- end -}}
-{{- if .Values.prysmValidator.enabled -}}
-{{ $vlCount = add1 $vlCount -}}
-{{- end -}}
-
-{{- if gt $vlCount 1 -}}
-{{ fail "ERROR: You can only enable one validator client" -}}
-{{- end }}
-
-{{- if eq $vlCount 0 -}}
-{{ fail "ERROR: You must enable at least one validator client" -}}
-{{- end }}

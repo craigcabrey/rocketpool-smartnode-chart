@@ -1,4 +1,4 @@
-{{- if .Values.rocketPool.mevBoost.enabled -}}
+{{- if .Values.mevBoost.enabled -}}
 {{- if eq .Values.global.main.network "holesky" }}
 {{- fail "The holesky network does not support mev-boost" }}
 {{- end }}
