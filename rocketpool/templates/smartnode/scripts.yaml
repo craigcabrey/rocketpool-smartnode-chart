@@ -15,9 +15,8 @@ data:
       --header "Accept: application/json, */*" \
       --header "Content-Type: application/strategic-merge-patch+json" \
       --request PATCH \
-      --data '{"spec":{"template":{"metadata":{"annotations":{"kubectl.kubrnetes.io/restartedAt":"'"$(date +%Y-%m-%dT%T%z)"'"}}}}}' \
-                                                                                                                          # FIXME
-      "https://$KUBERNETES_SERVICE_HOST:$KUBERNETES_SERVICE_PORT_HTTPS/api/apps/v1/namespaces/$NAMESPACE/statefulsets/{{ .Release.Name }}-lighthouse-validator"
+      --data '{"spec":{"replicas":1,"template":{"metadata":{"annotations":{"kubectl.kubernetes.io/restartedAt":"'"$(date +%Y-%m-%dT%T%z)"'"}}}}}' \
+      "https://$KUBERNETES_SERVICE_HOST:$KUBERNETES_SERVICE_PORT_HTTPS/apis/apps/v1/namespaces/$NAMESPACE/statefulsets/{{ .Release.Name }}-validator"
   stop-validator.sh: |
     #!/bin/sh
 
@@ -27,4 +26,8 @@ data:
     curl \
       --cacert /var/run/secrets/kubernetes.io/serviceaccount/ca.crt \
       --header "Authorization: Bearer $TOKEN" \
-      "https://$KUBERNETES_SERVICE_HOST:$KUBERNETES_SERVICE_PORT_HTTPS/api/v1/namespaces/$NAMESPACE/services/"
+      --header "Accept: application/json, */*" \
+      --header "Content-Type: application/strategic-merge-patch+json" \
+      --request PATCH \
+      --data '{"spec":{"replicas":0}}' \
+      "https://$KUBERNETES_SERVICE_HOST:$KUBERNETES_SERVICE_PORT_HTTPS/apis/apps/v1/namespaces/$NAMESPACE/statefulsets/{{ .Release.Name }}-validator"

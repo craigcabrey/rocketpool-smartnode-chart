@@ -30,7 +30,6 @@ dependencies:
     condition: ethereumNode.enabled
     repository: https://ethpandaops.github.io/ethereum-helm-charts
   - name: lighthouse
-    alias: lighthouseValidator
     version: 1.1.2
     condition: lighthouseValidator.enabled
     repository: https://ethpandaops.github.io/ethereum-helm-charts

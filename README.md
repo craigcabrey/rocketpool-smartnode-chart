@@ -18,4 +18,4 @@ This is expected. Once the executor and consensus clients sync, the smartnode co
 - [ ] Fix all the hardcoded values
 - [ ] Setup CI
 - [ ] Support longhorn [volume encryption](https://longhorn.io/docs/1.5.3/advanced-resources/security/volume-encryption/) for keys
-- [ ] Test & fix scripts for restarting/stopping validator
+- [x] Test & fix scripts for restarting/stopping validator

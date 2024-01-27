@@ -158,8 +158,8 @@ ethereumNode:
     serviceAccount:
       create: false
 
-lighthouseValidator:
-  nameOverride: lighthouse-validator
+lighthouse:
+  nameOverride: validator
   enabled: false
   mode: validator
   extraArgs:

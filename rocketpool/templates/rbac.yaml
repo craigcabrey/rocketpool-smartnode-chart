@@ -4,9 +4,12 @@ kind: Role
 metadata:
   name: smartnode
 rules:
-  - apiGroups: [""]
-    resources: ["statefulsets"]
-    verbs: ["patch"]
+  - apiGroups:
+      - apps
+    resources:
+      - statefulsets
+    verbs:
+      - patch
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
