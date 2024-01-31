@@ -34,14 +34,18 @@ smartNode:
     repository: docker.io/rocketpool/smartnode
     tag: ""
 
-  metricsPort: 9102
+  metrics:
+    enabled: true
+    port: 9102
 
 watchtower:
   image:
     repository: docker.io/rocketpool/smartnode
     tag: ""
 
-  metricsPort: 9102
+  metrics:
+    enabled: true
+    port: 9102
 
   maxFeeOverride: 200
   prioFeeOverride: 3
@@ -72,16 +76,14 @@ ethereumNode:
         --metrics-enabled
         --metrics-host=0.0.0.0
         --metrics-port={{ .Values.metricsPort }}
+        --data-storage-format=bonsai
+        --sync-mode=X_SNAP
+        --Xsnapsync-synchronizer-flat-db-healing-enabled=true
+        --fast-sync-min-peers=3
+        --rpc-http-max-active-connections=1024
       {{- range .Values.extraArgs }}
         {{ tpl . $ }}
       {{- end }}
-    extraArgs:
-      - --data-storage-format=bonsai
-      - --network=holesky
-      - --sync-mode=X_SNAP
-      - --Xsnapsync-synchronizer-flat-db-healing-enabled=true
-      - --fast-sync-min-peers=3
-      - --rpc-http-max-active-connections=1024
 
     authPort: 8551
     httpPort: 8545
@@ -162,13 +164,37 @@ lighthouse:
   nameOverride: validator
   enabled: false
   mode: validator
-  extraArgs:
-    - --network
-    - *global-network
+  defaultValidatorCommandTemplate: |
+    - sh
+    - -ac
+    - >
+      exec lighthouse
+      --network {{ .Values.global.main.network }}
+      --datadir /data/data/validators/lighthouse
+      validator
+      --init-slashing-protection
+      --logfile-max-number 0
+      --beacon-nodes http://{{ .Release.Name }}-beacon:5052
+      --suggested-fee-recipient $(cat /data/data/validators/rp-fee-recipient.txt)
+      --enable-doppelganger-protection
+      --metrics
+      --metrics-address 0.0.0.0
+      --metrics-port {{ .Values.metricsPort }}
+    {{- range .Values.extraArgs }}
+      {{ tpl . $ }}
+    {{- end }}
   rbac:
     create: false
   serviceAccount:
     create: false
+
+  extraVolumeMounts:
+    - name: data
+      mountPath: /data
+  extraVolumes:
+    - name: data
+      persistentVolumeClaim:
+        claimName: smartnode-data
 
   # FIXME: maybe use default
   metricsPort: 9101

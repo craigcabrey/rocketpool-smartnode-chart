@@ -64,7 +64,7 @@ data:
       consensusClientMode: external
       ecMetricsPort: {{ include "rocketpool.executionClient.metricsPort" . }}
       enableBitflyNodeMetrics: false
-      enableMetrics: false
+      enableMetrics: {{ .Values.smartNode.metrics.enabled }}
       enableMevBoost: {{ .Values.mevBoost.enabled }}
       enableODaoMetrics: false
       consensusClient: {{ include "rocketpool.executionClient" . }}
@@ -72,13 +72,13 @@ data:
       exporterMetricsPort: "9103"
       externalConsensusClient: {{ include "rocketpool.consensusClient" . }}
       isNative: true
-      nodeMetricsPort: {{ .Values.smartNode.metricsPort }}
+      nodeMetricsPort: {{ .Values.smartNode.metrics.port }}
       reconnectDelay: 60s
       rpDir: /data
       useFallbackClients: {{ .Values.rocketPool.fallbackNode.enabled }}
       vcMetricsPort: {{ include "rocketpool.validatorClient.metricsPort" . }}
       version: v{{ .Chart.AppVersion }}
-      watchtowerMetricsPort: {{ .Values.watchtower.metricsPort }}
+      watchtowerMetricsPort: {{ .Values.watchtower.metrics.port }}
     smartnode:
       archiveECUrl: ""
       checkpointRetentionLimit: "200"

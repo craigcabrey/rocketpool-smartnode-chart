@@ -19,6 +19,10 @@ spec:
     type: Recreate
   template:
     metadata:
+      annotations:
+        prometheus.io/scrape: '{{ .Values.watchtower.metrics.enabled }}'
+        prometheus.io/path: '/metrics'
+        prometheus.io/port: '{{ .Values.watchtower.metrics.port }}'
       labels:
         app.kubernetes.io/component: watchtower
         app.kubernetes.io/name: watchtower
@@ -31,13 +35,14 @@ spec:
           args:
             - --metricsAddress
             - 0.0.0.0
-            - --metricsPort={{ .Values.watchtower.metricsPort }}
+            - --metricsPort
+            - '{{ .Values.watchtower.metrics.port }}'
             - --settings
             - /config/user-settings.yaml
             - watchtower
           ports:
             - name: metrics
-              containerPort: {{ .Values.watchtower.metricsPort }}
+              containerPort: {{ .Values.watchtower.metrics.port }}
               protocol: TCP
           volumeMounts:
             - mountPath: /config

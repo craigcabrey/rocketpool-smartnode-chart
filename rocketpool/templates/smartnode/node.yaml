@@ -14,6 +14,10 @@ spec:
       app.kubernetes.io/part-of: rocketpool
   template:
     metadata:
+      annotations:
+        prometheus.io/scrape: '{{ .Values.smartNode.metrics.enabled }}'
+        prometheus.io/path: '/metrics'
+        prometheus.io/port: '{{ .Values.smartNode.metrics.port }}'
       labels:
         app.kubernetes.io/component: smartnode
         app.kubernetes.io/name: smartnode
@@ -22,12 +26,13 @@ spec:
       serviceAccountName: smartnode
       containers:
         - name: smartnode
-          image: "{{ .Values.smartNode.image.repository }}:v{{ .Values.smartNode.image.tag | default .Chart.AppVersion }}"
+          image: '{{ .Values.smartNode.image.repository }}:v{{ .Values.smartNode.image.tag | default .Chart.AppVersion }}'
           imagePullPolicy: IfNotPresent
           args:
             - --metricsAddress
             - 0.0.0.0
-            - --metricsPort={{ .Values.smartNode.metricsPort }}
+            - --metricsPort
+            - '{{ .Values.smartNode.metrics.port }}'
             - --settings
             - /config/user-settings.yaml
             - node
@@ -40,7 +45,7 @@ spec:
                   - apt update && apt install -y curl
           ports:
             - name: metrics
-              containerPort: {{ .Values.smartNode.metricsPort }}
+              containerPort: {{ .Values.smartNode.metrics.port }}
               protocol: TCP
           volumeMounts:
             - name: config
