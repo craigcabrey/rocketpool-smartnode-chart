@@ -6,8 +6,14 @@ global:
 primaryNode:
   besu:
     enabled: true
+    persistence:
+      enabled: true
+      existingClaim: eth1-data
   lighthouse:
     enabled: true
+    persistence:
+      enabled: true
+      existingClaim: eth2-data
 
 fallbackNode:
   besu:

@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  labels:
+    type: local
+  name: eth1-data
+spec:
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 1Ti
+  hostPath:
+    path: /mnt/data/eth1
+    type: ""
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: manual
+  volumeMode: Filesystem
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: eth1-data
+  namespace: rocketpool
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Ti
+  storageClassName: manual
+  volumeMode: Filesystem
+  volumeName: eth1-data

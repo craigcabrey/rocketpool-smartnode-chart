@@ -16,7 +16,7 @@ Currently there is support for `besu` as the execution client & `lighthouse` as 
 1. Use the wizard to generate a basic values.yaml: `$ wizard.sh`
 2. `helm upgrade --install release-name ./rocketpool -f values.yaml -n rocketpool --create-namespace`
 
-See `values.example.yaml` for an extremely minimal setup.
+See `example/values.yaml` for an extremely minimal setup.
 
 ## Smartnode & Watchtower crashing after install
 
