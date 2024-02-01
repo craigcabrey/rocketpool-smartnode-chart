@@ -14,29 +14,49 @@ data:
       bitflyMachineName: {{ .Values.rocketPool.bitflyNodeMetrics.bitflyMachineName }}
       bitflySecret: {{ .Values.rocketPool.bitflyNodeMetrics.bitflySecret }}
     consensusCommon:
-      apiPort: {{ include "rocketpool.consensusClient.httpPort" . }}
+      apiPort: {{ include "rocketpool.primaryConsensusClient.httpPort" . }}
       # FIXME
       checkpointSyncUrl: ""
       # FIXME
       doppelgangerDetection: true
       graffiti: ""
       openApiPort: closed
-      p2pPort: {{ include "rocketpool.consensusClient.p2pPort" . }}
+      p2pPort: {{ include "rocketpool.primaryConsensusClient.p2pPort" . }}
     executionCommon:
-      enginePort: {{ include "rocketpool.executionClient.enginePort" . }}
+      enginePort: {{ include "rocketpool.primaryExecutionClient.enginePort" . }}
       ethstatsLabel: ""
       ethstatsLogin: ""
-      httpPort: {{ include "rocketpool.executionClient.httpPort" . }}
+      httpPort: {{ include "rocketpool.primaryExecutionClient.httpPort" . }}
       openRpcPorts: closed
-      p2pPort: {{ include "rocketpool.executionClient.p2pPort" . }}
-      wsPort: {{ include "rocketpool.executionClient.wsPort" . }}
+      p2pPort: {{ include "rocketpool.primaryExecutionClient.p2pPort" . }}
+      wsPort: {{ include "rocketpool.primaryExecutionClient.wsPort" . }}
+    {{- if .Values.fallbackNode.enabled }}
+    {{- if .Values.fallbackNode.prysm.enabled }}
     fallbackNormal:
-      ccHttpUrl: {{ .Values.rocketPool.fallbackNode.normal.consensusEndpoint }}
-      ecHttpUrl: {{ .Values.rocketPool.fallbackNode.normal.executionEndpoint }}
+      ccHttpUrl:
+      ecHttpUrl:
     fallbackPrysm:
-      ccHttpUrl: {{ .Values.rocketPool.fallbackNode.prysm.consensusEndpoint }}
-      ecHttpUrl: {{ .Values.rocketPool.fallbackNode.prysm.executionEndpoint }}
+      ccHttpUrl: http://{{ .Release.Name }}-rocketpool-fallback-beacon:{{ include "rocketpool.fallbackConsensusClient.httpPort" . }}
+      ecHttpUrl: http://{{ .Release.Name }}-rocketpool-fallback-execution:{{ include "rocketpool.fallbackExecutionClient.httpPort" . }}
       jsonRpcUrl: {{ .Values.rocketPool.fallbackNode.prysm.jsonRpcEndpoint }}
+    {{- else }}
+    fallbackNormal:
+      ccHttpUrl: http://{{ .Release.Name }}-rocketpool-fallback-beacon:{{ include "rocketpool.fallbackConsensusClient.httpPort" . }}
+      ecHttpUrl: http://{{ .Release.Name }}-rocketpool-fallback-execution:{{ include "rocketpool.fallbackExecutionClient.httpPort" . }}
+    fallbackPrysm:
+      ccHttpUrl:
+      ecHttpUrl:
+      jsonRpcUrl:
+    {{- end }}
+    {{- else }}
+    fallbackNormal:
+      ccHttpUrl:
+      ecHttpUrl:
+    fallbackPrysm:
+      ccHttpUrl:
+      ecHttpUrl:
+      jsonRpcUrl:
+    {{- end }}
     mevBoost:
       additionalFlags: ""
       aestusEnabled: false
@@ -53,29 +73,29 @@ data:
       selectionMode: profile
       ultrasoundEnabled: false
     native:
-      ccHttpUrl: http://{{ .Release.Name }}-beacon:{{ include "rocketpool.consensusClient.httpPort" . }}
-      consensusClient: {{ include "rocketpool.consensusClient" . }}
-      ecHttpUrl: http://{{ .Release.Name }}-execution:{{ include "rocketpool.executionClient.httpPort" . }}
+      ccHttpUrl: http://{{ .Release.Name }}-rocketpool-primary-beacon:{{ include "rocketpool.primaryConsensusClient.httpPort" . }}
+      consensusClient: {{ include "rocketpool.primaryConsensusClient" . }}
+      ecHttpUrl: http://{{ .Release.Name }}-rocketpool-primary-execution:{{ include "rocketpool.primaryExecutionClient.httpPort" . }}
       validatorRestartCommand: /scripts/restart-validator.sh
       validatorStopCommand: /scripts/stop-validator.sh
     root:
-      bnMetricsPort: {{ include "rocketpool.consensusClient.metricsPort" . }}
-      consensusClient: {{ include "rocketpool.consensusClient" . }}
+      bnMetricsPort: {{ include "rocketpool.primaryConsensusClient.metricsPort" . }}
+      consensusClient: {{ include "rocketpool.primaryConsensusClient" . }}
       consensusClientMode: external
-      ecMetricsPort: {{ include "rocketpool.executionClient.metricsPort" . }}
+      ecMetricsPort: {{ include "rocketpool.primaryExecutionClient.metricsPort" . }}
       enableBitflyNodeMetrics: false
       enableMetrics: {{ .Values.smartNode.metrics.enabled }}
       enableMevBoost: {{ .Values.mevBoost.enabled }}
       enableODaoMetrics: false
-      consensusClient: {{ include "rocketpool.executionClient" . }}
+      consensusClient: {{ include "rocketpool.primaryExecutionClient" . }}
       executionClientMode: external
       exporterMetricsPort: "9103"
-      externalConsensusClient: {{ include "rocketpool.consensusClient" . }}
+      externalConsensusClient: {{ include "rocketpool.primaryConsensusClient" . }}
       isNative: true
       nodeMetricsPort: {{ .Values.smartNode.metrics.port }}
       reconnectDelay: 60s
       rpDir: /data
-      useFallbackClients: {{ .Values.rocketPool.fallbackNode.enabled }}
+      useFallbackClients: {{ .Values.fallbackNode.enabled }}
       vcMetricsPort: {{ include "rocketpool.validatorClient.metricsPort" . }}
       version: v{{ .Chart.AppVersion }}
       watchtowerMetricsPort: {{ .Values.watchtower.metrics.port }}

@@ -3,11 +3,17 @@ global:
     checkpointSync:
       enabled: true
 
-ethereumNode:
+primaryNode:
   besu:
     enabled: true
   lighthouse:
     enabled: true
 
-lighthouseValidator:
+fallbackNode:
+  besu:
+    enabled: true
+  lighthouse:
+    enabled: true
+
+lighthouse:
   enabled: true

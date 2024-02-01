@@ -1,23 +1,47 @@
-{{- define "rocketpool.consensusClient" -}}
-{{- if .Values.ethereumNode.lighthouse.enabled -}}
+{{- define "rocketpool.primaryConsensusClient" -}}
+{{- if .Values.primaryNode.lighthouse.enabled -}}
 {{- default "lighthouse" }}
 {{- end -}}
 {{- end -}}
 
-{{- define "rocketpool.consensusClient.httpPort" -}}
-{{- if .Values.ethereumNode.lighthouse.enabled -}}
-{{- .Values.ethereumNode.lighthouse.httpPort }}
+{{- define "rocketpool.primaryConsensusClient.httpPort" -}}
+{{- if .Values.primaryNode.lighthouse.enabled -}}
+{{- .Values.primaryNode.lighthouse.httpPort }}
 {{- end -}}
 {{- end -}}
 
-{{- define "rocketpool.consensusClient.metricsPort" -}}
-{{- if .Values.ethereumNode.lighthouse.enabled -}}
-{{- .Values.ethereumNode.lighthouse.metricsPort }}
+{{- define "rocketpool.primaryConsensusClient.metricsPort" -}}
+{{- if .Values.primaryNode.lighthouse.enabled -}}
+{{- .Values.primaryNode.lighthouse.metricsPort }}
 {{- end -}}
 {{- end -}}
 
-{{- define "rocketpool.consensusClient.p2pPort" -}}
-{{- if .Values.ethereumNode.lighthouse.enabled -}}
-{{- .Values.ethereumNode.lighthouse.p2pPort }}
+{{- define "rocketpool.primaryConsensusClient.p2pPort" -}}
+{{- if .Values.primaryNode.lighthouse.enabled -}}
+{{- .Values.primaryNode.lighthouse.p2pPort }}
+{{- end -}}
+{{- end -}}
+
+{{- define "rocketpool.fallbackConsensusClient" -}}
+{{- if .Values.fallbackNode.lighthouse.enabled -}}
+{{- default "lighthouse" }}
+{{- end -}}
+{{- end -}}
+
+{{- define "rocketpool.fallbackConsensusClient.httpPort" -}}
+{{- if .Values.fallbackNode.lighthouse.enabled -}}
+{{- .Values.fallbackNode.lighthouse.httpPort }}
+{{- end -}}
+{{- end -}}
+
+{{- define "rocketpool.fallbackConsensusClient.metricsPort" -}}
+{{- if .Values.fallbackNode.lighthouse.enabled -}}
+{{- .Values.fallbackNode.lighthouse.metricsPort }}
+{{- end -}}
+{{- end -}}
+
+{{- define "rocketpool.fallbackConsensusClient.p2pPort" -}}
+{{- if .Values.fallbackNode.lighthouse.enabled -}}
+{{- .Values.fallbackNode.lighthouse.p2pPort }}
 {{- end -}}
 {{- end -}}

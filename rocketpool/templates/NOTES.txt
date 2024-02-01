@@ -1,0 +1,3 @@
+Now run the setup script `$ ./scripts/setup.sh`.
+
+Note! Once the setup is complete, the smartnode pods will start. They will crashloop until the execution & consensus clients fully sync. This is expected behavior!

@@ -1,40 +1,16 @@
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: batch/v1
+kind: Job
 metadata:
-  name: {{ include "rocketpool.fullname" . }}-smartnode
+  name: {{ include "rocketpool.fullname" . }}-setup
   labels:
-    app.kubernetes.io/component: smartnode
-    app.kubernetes.io/name: smartnode
+    app.kubernetes.io/component: setup
+    app.kubernetes.io/name: rocketpool-cli
     app.kubernetes.io/part-of: rocketpool
 spec:
-  selector:
-    matchLabels:
-      app.kubernetes.io/component: smartnode
-      app.kubernetes.io/name: smartnode
-      app.kubernetes.io/part-of: rocketpool
   template:
-    metadata:
-      annotations:
-        prometheus.io/scrape: '{{ .Values.smartNode.metrics.enabled }}'
-        prometheus.io/path: '/metrics'
-        prometheus.io/port: '{{ .Values.smartNode.metrics.port }}'
-      labels:
-        app.kubernetes.io/component: smartnode
-        app.kubernetes.io/name: smartnode
-        app.kubernetes.io/part-of: rocketpool
     spec:
-      serviceAccountName: smartnode
       initContainers:
-        - name: wait-for-setup
-          image: busybox
-          command:
-            - sh
-            - -c
-            - while [ ! -f /data/pre-setup-complete ]; do echo "Waiting for setup..."; sleep 5; done
-          volumeMounts:
-            - name: data
-              mountPath: /data
-        - name: chown-data
+        - name: init
           image: busybox
           command:
             - chown
@@ -44,18 +20,15 @@ spec:
           volumeMounts:
             - name: data
               mountPath: /data
+      restartPolicy: Never
       containers:
-        - name: smartnode
+        - name: setup
           image: '{{ .Values.smartNode.image.repository }}:v{{ .Values.smartNode.image.tag | default .Chart.AppVersion }}'
           imagePullPolicy: IfNotPresent
-          args:
-            - --metricsAddress
-            - 0.0.0.0
-            - --metricsPort
-            - '{{ .Values.smartNode.metrics.port }}'
-            - --settings
-            - /data/user-settings.yml
-            - node
+          command:
+            - sh
+            - -c
+            - while [ ! -f /data/setup-complete ]; do sleep 5; done
           env:
             - name: PATH
               value: /scripts:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
@@ -78,7 +51,6 @@ spec:
             - name: scripts
               mountPath: /scripts
               readOnly: true
-      restartPolicy: Always
       volumes:
         - name: config
           configMap:

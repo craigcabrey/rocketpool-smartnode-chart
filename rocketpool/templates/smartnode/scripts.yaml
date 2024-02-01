@@ -3,6 +3,25 @@ kind: ConfigMap
 metadata:
   name: smartnode-scripts
 data:
+  post-start.sh: |
+    #!/bin/sh
+
+    VERSION="v{{ .Values.smartNode.image.tag | default .Chart.AppVersion }}"
+
+    if ! command -v curl >/dev/null; then
+      apt update && apt install -y curl
+    fi
+
+    curl \
+      --output /tmp/rocketpool \
+      -L "https://github.com/rocket-pool/smartnode-install/releases/download/$VERSION/rocketpool-cli-linux-amd64"
+    chmod +x /tmp/rocketpool
+  rocketpool: |
+    #!/bin/sh
+
+    # FIXME: don't run as root
+    # FIXME: query API through RPC instead of this hack (coming in smartnode v2)
+    /tmp/rocketpool --allow-root --config-path=/data --daemon-path=/go/bin/rocketpool $@
   restart-validator.sh: |
     #!/bin/sh
 
@@ -16,7 +35,24 @@ data:
       --header "Content-Type: application/strategic-merge-patch+json" \
       --request PATCH \
       --data '{"spec":{"replicas":1,"template":{"metadata":{"annotations":{"kubectl.kubernetes.io/restartedAt":"'"$(date +%Y-%m-%dT%T%z)"'"}}}}}' \
-      "https://$KUBERNETES_SERVICE_HOST:$KUBERNETES_SERVICE_PORT_HTTPS/apis/apps/v1/namespaces/$NAMESPACE/statefulsets/{{ .Release.Name }}-validator"
+      "https://$KUBERNETES_SERVICE_HOST:$KUBERNETES_SERVICE_PORT_HTTPS/apis/apps/v1/namespaces/$NAMESPACE/statefulsets/{{ .Release.Name }}-rocketpool-validator"
+  setup.sh: |
+    #!/bin/sh
+ 
+    mkdir -p /data/validators
+    mkdir -p /data/rewards-trees
+    mkdir -p /data/custom-keys
+    chown -R 10001:10001 /data
+    touch /data/pre-setup-complete
+
+    read -p \
+    "Launching the rocketpool service config interface.
+    Please confirm that the configuration is correct.
+    Note that you will not be able to change any settings here.
+    Press enter to continue." unused
+
+    /scripts/rocketpool service config
+    touch /data/setup-complete
   stop-validator.sh: |
     #!/bin/sh
 
@@ -30,4 +66,4 @@ data:
       --header "Content-Type: application/strategic-merge-patch+json" \
       --request PATCH \
       --data '{"spec":{"replicas":0}}' \
-      "https://$KUBERNETES_SERVICE_HOST:$KUBERNETES_SERVICE_PORT_HTTPS/apis/apps/v1/namespaces/$NAMESPACE/statefulsets/{{ .Release.Name }}-validator"
+      "https://$KUBERNETES_SERVICE_HOST:$KUBERNETES_SERVICE_PORT_HTTPS/apis/apps/v1/namespaces/$NAMESPACE/statefulsets/{{ .Release.Name }}-rocketpool-validator"

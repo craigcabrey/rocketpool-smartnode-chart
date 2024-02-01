@@ -1,3 +1,4 @@
+{{- if .Values.watchtower.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -28,6 +29,16 @@ spec:
         app.kubernetes.io/name: watchtower
         app.kubernetes.io/part-of: rocketpool
     spec:
+      initContainers:
+        - name: wait-for-setup
+          image: busybox
+          command:
+            - sh
+            - -c
+            - while [ ! -f /data/setup-complete ]; do echo "Waiting for setup..."; sleep 5; done
+          volumeMounts:
+            - name: data
+              mountPath: /data
       containers:
         - name: smartnode
           image: "{{ .Values.smartNode.image.repository }}:v{{ .Values.smartNode.image.tag | default .Chart.AppVersion }}"
@@ -38,18 +49,24 @@ spec:
             - --metricsPort
             - '{{ .Values.watchtower.metrics.port }}'
             - --settings
-            - /config/user-settings.yaml
+            - /data/user-settings.yml
             - watchtower
           ports:
             - name: metrics
               containerPort: {{ .Values.watchtower.metrics.port }}
               protocol: TCP
           volumeMounts:
-            - mountPath: /config
+            - mountPath: /data/user-settings.yml
+              subPath: user-settings.yaml
               name: config
             - mountPath: /data
               name: data
       restartPolicy: Always
+      securityContext:
+        fsGroup: 10001
+        runAsNonRoot: true
+        runAsGroup: 10001
+        runAsUser: 10001
       volumes:
         - name: config
           configMap:
@@ -58,3 +75,4 @@ spec:
         - name: data
           persistentVolumeClaim:
             claimName: smartnode-data
+{{- end }}

@@ -1,6 +1,6 @@
 global:
   main:
-    network: &global-network holesky
+    network: holesky
   checkpointSync:
     enabled: false
 
@@ -9,15 +9,6 @@ rocketPool:
     bitflyEndpoint: https://beaconcha.in/api/v1/client/metrics
     bitflyMachineName: Smartnode
     bitflySecret: ""
-  fallbackNode:
-    enabled: false
-    normal:
-      consensusEndpoint:
-      executionEndpoint:
-    prysm:
-      consensusEndpoint:
-      executionEndpoint:
-      jsonRpcEndpoint:
   rescueNode:
     enabled: false
     username:
@@ -39,6 +30,8 @@ smartNode:
     port: 9102
 
 watchtower:
+  enabled: false
+
   image:
     repository: docker.io/rocketpool/smartnode
     tag: ""
@@ -52,9 +45,18 @@ watchtower:
 
 # See documentation for options:
 # https://github.com/ethpandaops/ethereum-helm-charts
-ethereumNode:
+primaryNode:
+  enabled: true
+
+  global:
+    main:
+      engineEndpoint: http://{{ .Release.Name }}-rocketpool-primary-execution:8551
+      rpcEndpoint: http://{{ .Release.Name }}-rocketpool-primary-execution:8545
+      beaconEndpoint: http://{{ .Release.Name }}-rocketpool-primary-beacon:5052
+
   # Execution Layer clients
   besu:
+    nameOverride: rocketpool-primary-execution
     defaultCommandTemplate: |
       - sh
       - -ac
@@ -96,26 +98,31 @@ ethereumNode:
     serviceAccount:
       create: false
   erigon:
+    nameOverride: rocketpool-primary-execution
     rbac:
       create: false
     serviceAccount:
       create: false
   ethereumjs:
+    nameOverride: rocketpool-primary-execution
     rbac:
       create: false
     serviceAccount:
       create: false
   geth:
+    nameOverride: rocketpool-primary-execution
     rbac:
       create: false
     serviceAccount:
       create: false
   nethermind:
+    nameOverride: rocketpool-primary-execution
     rbac:
       create: false
     serviceAccount:
       create: false
   reth:
+    nameOverride: rocketpool-primary-execution
     rbac:
       create: false
     serviceAccount:
@@ -123,11 +130,13 @@ ethereumNode:
 
   # Consensus Layer clients
   grandine:
+    nameOverride: rocketpool-primary-beacon
     rbac:
       create: false
     serviceAccount:
       create: false
   lighthouse:
+    nameOverride: rocketpool-primary-beacon
     image:
       tag: latest-modern
 
@@ -140,29 +149,164 @@ ethereumNode:
     serviceAccount:
       create: false
   lodestar:
+    nameOverride: rocketpool-primary-beacon
     rbac:
       create: false
     serviceAccount:
       create: false
   nimbus:
+    nameOverride: rocketpool-primary-beacon
     rbac:
       create: false
     serviceAccount:
       create: false
   prysm:
+    nameOverride: rocketpool-primary-beacon
     rbac:
       create: false
     serviceAccount:
       create: false
   teku:
+    nameOverride: rocketpool-primary-beacon
     rbac:
       create: false
     serviceAccount:
       create: false
 
-lighthouse:
-  nameOverride: validator
+fallbackNode:
   enabled: false
+
+  # FIXME: overwrites the primary node global
+  global:
+    main:
+      engineEndpoint: http://{{ .Release.Name }}-rocketpool-fallback-execution:8551
+      rpcEndpoint: http://{{ .Release.Name }}-rocketpool-fallback-execution:8545
+      beaconEndpoint: http://{{ .Release.Name }}-rocketpool-fallback-beacon:5052
+
+  # Execution Layer clients
+  besu:
+    nameOverride: rocketpool-fallback-execution
+    defaultCommandTemplate: |
+      - sh
+      - -ac
+      - >
+        exec besu
+        --data-path=/data
+        --nat-method=KUBERNETES
+        --rpc-http-enabled
+        --rpc-http-host=0.0.0.0
+        --rpc-http-port={{ .Values.httpPort }}
+        --rpc-http-cors-origins=*
+        --rpc-ws-enabled
+        --rpc-ws-host=0.0.0.0
+        --rpc-ws-port={{ .Values.wsPort }}
+        --host-allowlist=*
+        --engine-jwt-secret=/data/jwt.hex
+        --engine-rpc-port={{ .Values.authPort }}
+        --engine-host-allowlist=*
+        --metrics-enabled
+        --metrics-host=0.0.0.0
+        --metrics-port={{ .Values.metricsPort }}
+        --data-storage-format=bonsai
+        --sync-mode=X_SNAP
+        --Xsnapsync-synchronizer-flat-db-healing-enabled=true
+        --fast-sync-min-peers=3
+        --rpc-http-max-active-connections=1024
+      {{- range .Values.extraArgs }}
+        {{ tpl . $ }}
+      {{- end }}
+
+    authPort: 8551
+    httpPort: 8545
+    metricsPort: 9545
+    p2pPort: 30303
+    wsPort: 8546
+
+    rbac:
+      create: false
+    serviceAccount:
+      create: false
+  erigon:
+    nameOverride: rocketpool-fallback-execution
+    rbac:
+      create: false
+    serviceAccount:
+      create: false
+  ethereumjs:
+    nameOverride: rocketpool-fallback-execution
+    rbac:
+      create: false
+    serviceAccount:
+      create: false
+  geth:
+    nameOverride: rocketpool-fallback-execution
+    rbac:
+      create: false
+    serviceAccount:
+      create: false
+  nethermind:
+    nameOverride: rocketpool-fallback-execution
+    rbac:
+      create: false
+    serviceAccount:
+      create: false
+  reth:
+    nameOverride: rocketpool-fallback-execution
+    rbac:
+      create: false
+    serviceAccount:
+      create: false
+
+  # Consensus Layer clients
+  grandine:
+    nameOverride: rocketpool-fallback-beacon
+    rbac:
+      create: false
+    serviceAccount:
+      create: false
+  lighthouse:
+    nameOverride: rocketpool-fallback-beacon
+    image:
+      tag: latest-modern
+
+    httpPort: 5052
+    metricsPort: 5054
+    p2pPort: 9001
+
+    rbac:
+      create: false
+    serviceAccount:
+      create: false
+  lodestar:
+    nameOverride: rocketpool-fallback-beacon
+    rbac:
+      create: false
+    serviceAccount:
+      create: false
+  nimbus:
+    nameOverride: rocketpool-fallback-beacon
+    rbac:
+      create: false
+    serviceAccount:
+      create: false
+  prysm:
+    nameOverride: rocketpool-fallback-beacon
+    rbac:
+      create: false
+    serviceAccount:
+      create: false
+  teku:
+    nameOverride: rocketpool-fallback-beacon
+    rbac:
+      create: false
+    serviceAccount:
+      create: false
+
+# Validators
+
+lighthouse:
+  enabled: false
+  nameOverride: rocketpool-validator
   mode: validator
   defaultValidatorCommandTemplate: |
     - sh
@@ -174,7 +318,7 @@ lighthouse:
       validator
       --init-slashing-protection
       --logfile-max-number 0
-      --beacon-nodes http://{{ .Release.Name }}-beacon:5052
+      --beacon-nodes http://{{ .Release.Name }}-rocketpool-primary-beacon:5052
       --suggested-fee-recipient $(cat /data/data/validators/rp-fee-recipient.txt)
       --enable-doppelganger-protection
       --metrics
@@ -188,28 +332,38 @@ lighthouse:
   serviceAccount:
     create: false
 
-  extraVolumeMounts:
-    - name: data
-      mountPath: /data
-  extraVolumes:
-    - name: data
-      persistentVolumeClaim:
-        claimName: smartnode-data
-
+  initContainers:
+    - name: wait-for-setup
+      image: busybox
+      command:
+        - sh
+        - -c
+        - while [ ! -f /data/setup-complete ]; do echo "Waiting for setup..."; sleep 5; done
+      volumeMounts:
+        - name: storage
+          mountPath: /data
   # FIXME: maybe use default
   metricsPort: 9101
 
-prysmValidator:
-  nameOverride: prysm-validator
+prysm:
   enabled: false
+  nameOverride: rocketpool-validator
   mode: validator
-  extraArgs:
-    - --network
-    - *global-network
   rbac:
     create: false
   serviceAccount:
     create: false
+
+  initContainers:
+    - name: wait-for-setup
+      image: busybox
+      command:
+        - sh
+        - -c
+        - while [ ! -f /data/setup-complete ]; do echo "Waiting for setup..."; sleep 5; done
+      volumeMounts:
+        - name: storage
+          mountPath: /data
  
 networkPolicy:
   create: false
@@ -222,34 +376,3 @@ serviceAccount:
   # The name of the service account to use.
   # If not set and create is true, a name is generated using the fullname template
   name: ""
-
-podAnnotations: {}
-
-podSecurityContext: {}
-  # fsGroup: 2000
-
-securityContext: {}
-  # capabilities:
-  #   drop:
-  #   - ALL
-  # readOnlyRootFilesystem: true
-  # runAsNonRoot: true
-  # runAsUser: 1000
-
-resources: {}
-  # We usually recommend not to specify default resources and to leave this as a conscious
-  # choice for the user. This also increases chances charts run on environments with little
-  # resources, such as Minikube. If you do want to specify resources, uncomment the following
-  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-  # limits:
-  #   cpu: 100m
-  #   memory: 128Mi
-  # requests:
-  #   cpu: 100m
-  #   memory: 128Mi
-
-nodeSelector: {}
-
-tolerations: []
-
-affinity: {}
