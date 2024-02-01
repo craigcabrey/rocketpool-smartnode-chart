@@ -1,0 +1,14 @@
+{{- if .Values.smartNode.persistence.enabled }}
+{{- if not .Values.smartNode.persistence.existingClaim }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Release.Name }}-rocketpool-smartnode-data
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi
+{{- end }}
+{{- end }}

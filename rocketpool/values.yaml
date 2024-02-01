@@ -29,6 +29,9 @@ smartNode:
     enabled: true
     port: 9102
 
+  persistence:
+    enabled: true
+
 watchtower:
   enabled: false
 
