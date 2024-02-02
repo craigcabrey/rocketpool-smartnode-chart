@@ -294,7 +294,7 @@ fallbackNode:
 
 # Validators
 
-grandineValidator:
+grandine:
   nameOverride: rocketpool-validator
   mode: validator
 
@@ -318,7 +318,7 @@ grandineValidator:
         - name: storage
           mountPath: /data
 
-lighthouseValidator:
+lighthouse:
   nameOverride: rocketpool-validator
   mode: validator
   defaultValidatorCommandTemplate: |
@@ -361,7 +361,7 @@ lighthouseValidator:
         - name: storage
           mountPath: /data
 
-lodestarValidator:
+lodestar:
   nameOverride: rocketpool-validator
   mode: validator
 
@@ -385,7 +385,7 @@ lodestarValidator:
         - name: storage
           mountPath: /data
 
-nimbusValidator:
+nimbus:
   nameOverride: rocketpool-validator
   mode: validator
 
@@ -409,7 +409,7 @@ nimbusValidator:
         - name: storage
           mountPath: /data
 
-prysmValidator:
+prysm:
   nameOverride: rocketpool-validator
   mode: validator
 
@@ -433,7 +433,7 @@ prysmValidator:
         - name: storage
           mountPath: /data
 
-tekuValidator:
+teku:
   nameOverride: rocketpool-validator
   mode: validator
 

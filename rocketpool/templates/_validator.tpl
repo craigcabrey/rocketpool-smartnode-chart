@@ -6,32 +6,32 @@ Ensure one and only one validator is enabled
 
 {{- if .Values.global.validator.grandine -}}
 {{ $vlCount = add1 $vlCount -}}
-{{ .Values.grandineValidator.metricsPort }}
+{{ .Values.grandine.metricsPort }}
 {{- end -}}
 
 {{- if .Values.global.validator.lighthouse -}}
 {{ $vlCount = add1 $vlCount -}}
-{{ .Values.lighthouseValidator.metricsPort }}
+{{ .Values.lighthouse.metricsPort }}
 {{- end -}}
 
 {{- if .Values.global.validator.lodestar -}}
 {{ $vlCount = add1 $vlCount -}}
-{{ .Values.lodestarValidator.metricsPort }}
+{{ .Values.lodestar.metricsPort }}
 {{- end -}}
 
 {{- if .Values.global.validator.nimbus -}}
 {{ $vlCount = add1 $vlCount -}}
-{{ .Values.nimbusValidator.metricsPort }}
+{{ .Values.nimbus.metricsPort }}
 {{- end -}}
 
 {{- if .Values.global.validator.prysm -}}
 {{ $vlCount = add1 $vlCount -}}
-{{ .Values.prysmValidator.metricsPort }}
+{{ .Values.prysm.metricsPort }}
 {{- end -}}
 
 {{- if .Values.global.validator.teku -}}
 {{ $vlCount = add1 $vlCount -}}
-{{ .Values.tekuValidator.metricsPort }}
+{{ .Values.teku.metricsPort }}
 {{- end -}}
 
 {{- if gt $vlCount 1 -}}
