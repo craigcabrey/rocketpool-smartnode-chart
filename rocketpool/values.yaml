@@ -313,7 +313,7 @@ grandine:
       command:
         - sh
         - -c
-        - while [ ! -f /data/setup-complete ]; do echo "Waiting for setup..."; sleep 5; done
+        - while [ ! -f /data/data/validators/rp-fee-recipient-env.txt ]; do echo "Waiting for fee recipient..."; sleep 5; done
       volumeMounts:
         - name: storage
           mountPath: /data
@@ -332,7 +332,7 @@ lighthouse:
       --init-slashing-protection
       --logfile-max-number 0
       --beacon-nodes http://{{ .Release.Name }}-rocketpool-primary-beacon:5052
-      --suggested-fee-recipient $(cat /data/data/validators/rp-fee-recipient.txt)
+      --suggested-fee-recipient $(cut -d'=' -f2 /data/data/validators/rp-fee-recipient-env.txt)
       --enable-doppelganger-protection
       --metrics
       --metrics-address 0.0.0.0
@@ -356,7 +356,7 @@ lighthouse:
       command:
         - sh
         - -c
-        - while [ ! -f /data/setup-complete ]; do echo "Waiting for setup..."; sleep 5; done
+        - while [ ! -f /data/data/validators/rp-fee-recipient-env.txt ]; do echo "Waiting for fee recipient..."; sleep 5; done
       volumeMounts:
         - name: storage
           mountPath: /data
@@ -380,7 +380,7 @@ lodestar:
       command:
         - sh
         - -c
-        - while [ ! -f /data/setup-complete ]; do echo "Waiting for setup..."; sleep 5; done
+        - while [ ! -f /data/data/validators/rp-fee-recipient-env.txt ]; do echo "Waiting for fee recipient..."; sleep 5; done
       volumeMounts:
         - name: storage
           mountPath: /data
@@ -404,7 +404,7 @@ nimbus:
       command:
         - sh
         - -c
-        - while [ ! -f /data/setup-complete ]; do echo "Waiting for setup..."; sleep 5; done
+        - while [ ! -f /data/data/validators/rp-fee-recipient-env.txt ]; do echo "Waiting for fee recipient..."; sleep 5; done
       volumeMounts:
         - name: storage
           mountPath: /data
@@ -428,7 +428,7 @@ prysm:
       command:
         - sh
         - -c
-        - while [ ! -f /data/setup-complete ]; do echo "Waiting for setup..."; sleep 5; done
+        - while [ ! -f /data/data/validators/rp-fee-recipient-env.txt ]; do echo "Waiting for fee recipient..."; sleep 5; done
       volumeMounts:
         - name: storage
           mountPath: /data
@@ -452,7 +452,7 @@ teku:
       command:
         - sh
         - -c
-        - while [ ! -f /data/setup-complete ]; do echo "Waiting for setup..."; sleep 5; done
+        - while [ ! -f /data/data/validators/rp-fee-recipient-env.txt ]; do echo "Waiting for fee recipient..."; sleep 5; done
       volumeMounts:
         - name: storage
           mountPath: /data
