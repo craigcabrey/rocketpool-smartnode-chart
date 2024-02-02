@@ -13,23 +13,6 @@ data:
       bitflyEndpoint: {{ .Values.rocketPool.bitflyNodeMetrics.bitflyEndpoint }}
       bitflyMachineName: {{ .Values.rocketPool.bitflyNodeMetrics.bitflyMachineName }}
       bitflySecret: {{ .Values.rocketPool.bitflyNodeMetrics.bitflySecret }}
-    consensusCommon:
-      apiPort: {{ include "rocketpool.primaryConsensusClient.httpPort" . }}
-      # FIXME
-      checkpointSyncUrl: ""
-      # FIXME
-      doppelgangerDetection: true
-      graffiti: ""
-      openApiPort: closed
-      p2pPort: {{ include "rocketpool.primaryConsensusClient.p2pPort" . }}
-    executionCommon:
-      enginePort: {{ include "rocketpool.primaryExecutionClient.enginePort" . }}
-      ethstatsLabel: ""
-      ethstatsLogin: ""
-      httpPort: {{ include "rocketpool.primaryExecutionClient.httpPort" . }}
-      openRpcPorts: closed
-      p2pPort: {{ include "rocketpool.primaryExecutionClient.p2pPort" . }}
-      wsPort: {{ include "rocketpool.primaryExecutionClient.wsPort" . }}
     {{- if .Values.fallbackNode.enabled }}
     {{- if .Values.fallbackNode.prysm.enabled }}
     fallbackNormal:
@@ -87,7 +70,6 @@ data:
       enableMetrics: {{ .Values.smartNode.metrics.enabled }}
       enableMevBoost: {{ .Values.mevBoost.enabled }}
       enableODaoMetrics: false
-      consensusClient: {{ include "rocketpool.primaryConsensusClient.name" . }}
       executionClientMode: external
       exporterMetricsPort: "9103"
       externalConsensusClient: {{ include "rocketpool.primaryConsensusClient.name" . }}
