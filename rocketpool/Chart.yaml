@@ -34,11 +34,33 @@ dependencies:
     version: 0.0.23
     condition: fallbackNode.enabled
     repository: https://ethpandaops.github.io/ethereum-helm-charts
+  - name: grandine
+    alias: grandineValidator
+    version: 0.0.1
+    condition: global.validator.grandine
+    repository: https://ethpandaops.github.io/ethereum-helm-charts
   - name: lighthouse
+    alias: lighthouseValidator
     version: 1.1.2
-    condition: lighthouse.enabled
+    condition: global.validator.lighthouse
+    repository: https://ethpandaops.github.io/ethereum-helm-charts
+  - name: lodestar
+    alias: lodestarValidator
+    version: 1.1.2
+    condition: global.validator.lodestar
+    repository: https://ethpandaops.github.io/ethereum-helm-charts
+  - name: nimbus
+    alias: nimbusValidator
+    version: 1.1.1
+    condition: global.validator.nimbus
     repository: https://ethpandaops.github.io/ethereum-helm-charts
   - name: prysm
+    alias: prysmValidator
     version: 1.1.2
-    condition: prysm.enabled
+    condition: global.validator.prysm
+    repository: https://ethpandaops.github.io/ethereum-helm-charts
+  - name: teku
+    alias: tekuValidator
+    version: 1.1.2
+    condition: global.validator.teku
     repository: https://ethpandaops.github.io/ethereum-helm-charts

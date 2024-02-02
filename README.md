@@ -24,7 +24,7 @@ This is expected. Once the executor and consensus clients sync, the smartnode co
 
 ## TODO
 
-- [ ] Support all clients
+- [x] Support all clients
 - [ ] Fix all the hardcoded values
 - [ ] Setup CI
 - [ ] Support longhorn [volume encryption](https://longhorn.io/docs/1.5.3/advanced-resources/security/volume-encryption/) for keys

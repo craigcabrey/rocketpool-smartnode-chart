@@ -58,11 +58,7 @@ spec:
             name: smartnode-config
         - name: data
           persistentVolumeClaim:
-            {{- if .Values.smartNode.persistence.existingClaim }}
-            claimName: {{ .Values.smartNode.persistence.existingClaim }}
-            {{- else }}
-            claimName: {{ .Release.Name }}-rockerpool-smartnode-data
-            {{- end }}
+            claimName: rocketpool-smartnode-data
         - name: scripts
           configMap:
             defaultMode: 0755

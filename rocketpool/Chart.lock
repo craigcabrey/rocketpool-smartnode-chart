@@ -2,11 +2,26 @@ dependencies:
 - name: ethereum-node
   repository: https://ethpandaops.github.io/ethereum-helm-charts
   version: 0.0.23
+- name: ethereum-node
+  repository: https://ethpandaops.github.io/ethereum-helm-charts
+  version: 0.0.23
+- name: grandine
+  repository: https://ethpandaops.github.io/ethereum-helm-charts
+  version: 0.0.1
 - name: lighthouse
   repository: https://ethpandaops.github.io/ethereum-helm-charts
   version: 1.1.2
+- name: lodestar
+  repository: https://ethpandaops.github.io/ethereum-helm-charts
+  version: 1.1.2
+- name: nimbus
+  repository: https://ethpandaops.github.io/ethereum-helm-charts
+  version: 1.1.1
 - name: prysm
   repository: https://ethpandaops.github.io/ethereum-helm-charts
   version: 1.1.2
-digest: sha256:8b4539313cc8782de7033b7681e4130ae346fc1074455a280781152a1a12be9d
-generated: "2024-01-25T19:23:57.916764407-06:00"
+- name: teku
+  repository: https://ethpandaops.github.io/ethereum-helm-charts
+  version: 1.1.2
+digest: sha256:a1ba5812719585f14e87e72977bbe32cc9d0bb04785ea6aa981b869f2a950d94
+generated: "2024-02-01T17:24:03.092613483-06:00"

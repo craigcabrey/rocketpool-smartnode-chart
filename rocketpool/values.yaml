@@ -1,8 +1,19 @@
 global:
-  main:
-    network: holesky
   checkpointSync:
     enabled: false
+  main:
+    network: holesky
+    # These depend on all clients using a consistent set of ports.
+    engineEndpoint: http://{{ .Release.Name }}-rocketpool-{{- include "rocketpool.nodeType" . | trim -}}-execution:8551
+    rpcEndpoint: http://{{ .Release.Name }}-rocketpool-{{- include "rocketpool.nodeType" . | trim -}}-execution:8545
+    beaconEndpoint: http://{{ .Release.Name }}-rocketpool-{{- include "rocketpool.nodeType" . | trim -}}-beacon:5052
+  validator:
+    grandine: false
+    lighthouse: false
+    lodestar: false
+    nimbus: false
+    prysm: false
+    teku: false
 
 rocketPool:
   bitflyNodeMetrics:
@@ -30,7 +41,7 @@ smartNode:
     port: 9102
 
   persistence:
-    enabled: true
+    enabled: false
 
 watchtower:
   enabled: false
@@ -50,15 +61,11 @@ watchtower:
 # https://github.com/ethpandaops/ethereum-helm-charts
 primaryNode:
   enabled: true
-
-  global:
-    main:
-      engineEndpoint: http://{{ .Release.Name }}-rocketpool-primary-execution:8551
-      rpcEndpoint: http://{{ .Release.Name }}-rocketpool-primary-execution:8545
-      beaconEndpoint: http://{{ .Release.Name }}-rocketpool-primary-beacon:5052
+  nameOverride: rocketpool-primary
 
   # Execution Layer clients
   besu:
+    enabled: false
     nameOverride: rocketpool-primary-execution
     defaultCommandTemplate: |
       - sh
@@ -90,42 +97,42 @@ primaryNode:
         {{ tpl . $ }}
       {{- end }}
 
-    authPort: 8551
-    httpPort: 8545
-    metricsPort: 9545
-    p2pPort: 30303
-    wsPort: 8546
-
     rbac:
       create: false
     serviceAccount:
       create: false
   erigon:
+    enabled: false
     nameOverride: rocketpool-primary-execution
     rbac:
       create: false
     serviceAccount:
       create: false
   ethereumjs:
+    enabled: false
     nameOverride: rocketpool-primary-execution
     rbac:
       create: false
     serviceAccount:
       create: false
   geth:
+    enabled: false
     nameOverride: rocketpool-primary-execution
     rbac:
       create: false
     serviceAccount:
       create: false
   nethermind:
+    enabled: false
     nameOverride: rocketpool-primary-execution
     rbac:
       create: false
     serviceAccount:
       create: false
   reth:
+    enabled: false
     nameOverride: rocketpool-primary-execution
+
     rbac:
       create: false
     serviceAccount:
@@ -133,6 +140,7 @@ primaryNode:
 
   # Consensus Layer clients
   grandine:
+    enabled: false
     nameOverride: rocketpool-primary-beacon
     rbac:
       create: false
@@ -142,10 +150,6 @@ primaryNode:
     nameOverride: rocketpool-primary-beacon
     image:
       tag: latest-modern
-
-    httpPort: 5052
-    metricsPort: 5054
-    p2pPort: 9001
 
     rbac:
       create: false
@@ -179,13 +183,6 @@ primaryNode:
 fallbackNode:
   enabled: false
 
-  # FIXME: overwrites the primary node global
-  global:
-    main:
-      engineEndpoint: http://{{ .Release.Name }}-rocketpool-fallback-execution:8551
-      rpcEndpoint: http://{{ .Release.Name }}-rocketpool-fallback-execution:8545
-      beaconEndpoint: http://{{ .Release.Name }}-rocketpool-fallback-beacon:5052
-
   # Execution Layer clients
   besu:
     nameOverride: rocketpool-fallback-execution
@@ -218,12 +215,6 @@ fallbackNode:
       {{- range .Values.extraArgs }}
         {{ tpl . $ }}
       {{- end }}
-
-    authPort: 8551
-    httpPort: 8545
-    metricsPort: 9545
-    p2pPort: 30303
-    wsPort: 8546
 
     rbac:
       create: false
@@ -272,10 +263,6 @@ fallbackNode:
     image:
       tag: latest-modern
 
-    httpPort: 5052
-    metricsPort: 5054
-    p2pPort: 9001
-
     rbac:
       create: false
     serviceAccount:
@@ -307,8 +294,31 @@ fallbackNode:
 
 # Validators
 
-lighthouse:
-  enabled: false
+grandineValidator:
+  nameOverride: rocketpool-validator
+  mode: validator
+
+  rbac:
+    create: false
+  serviceAccount:
+    create: false
+
+  persistence:
+    enabled: true
+    existingClaim: rocketpool-smartnode-data
+
+  initContainers:
+    - name: wait-for-setup
+      image: busybox
+      command:
+        - sh
+        - -c
+        - while [ ! -f /data/setup-complete ]; do echo "Waiting for setup..."; sleep 5; done
+      volumeMounts:
+        - name: storage
+          mountPath: /data
+
+lighthouseValidator:
   nameOverride: rocketpool-validator
   mode: validator
   defaultValidatorCommandTemplate: |
@@ -330,10 +340,15 @@ lighthouse:
     {{- range .Values.extraArgs }}
       {{ tpl . $ }}
     {{- end }}
+
   rbac:
     create: false
   serviceAccount:
     create: false
+
+  persistence:
+    enabled: true
+    existingClaim: rocketpool-smartnode-data
 
   initContainers:
     - name: wait-for-setup
@@ -345,17 +360,19 @@ lighthouse:
       volumeMounts:
         - name: storage
           mountPath: /data
-  # FIXME: maybe use default
-  metricsPort: 9101
 
-prysm:
-  enabled: false
+lodestarValidator:
   nameOverride: rocketpool-validator
   mode: validator
+
   rbac:
     create: false
   serviceAccount:
     create: false
+
+  persistence:
+    enabled: true
+    existingClaim: rocketpool-smartnode-data
 
   initContainers:
     - name: wait-for-setup
@@ -367,7 +384,79 @@ prysm:
       volumeMounts:
         - name: storage
           mountPath: /data
- 
+
+nimbusValidator:
+  nameOverride: rocketpool-validator
+  mode: validator
+
+  rbac:
+    create: false
+  serviceAccount:
+    create: false
+
+  persistence:
+    enabled: true
+    existingClaim: rocketpool-smartnode-data
+
+  initContainers:
+    - name: wait-for-setup
+      image: busybox
+      command:
+        - sh
+        - -c
+        - while [ ! -f /data/setup-complete ]; do echo "Waiting for setup..."; sleep 5; done
+      volumeMounts:
+        - name: storage
+          mountPath: /data
+
+prysmValidator:
+  nameOverride: rocketpool-validator
+  mode: validator
+
+  rbac:
+    create: false
+  serviceAccount:
+    create: false
+
+  persistence:
+    enabled: true
+    existingClaim: rocketpool-smartnode-data
+
+  initContainers:
+    - name: wait-for-setup
+      image: busybox
+      command:
+        - sh
+        - -c
+        - while [ ! -f /data/setup-complete ]; do echo "Waiting for setup..."; sleep 5; done
+      volumeMounts:
+        - name: storage
+          mountPath: /data
+
+tekuValidator:
+  nameOverride: rocketpool-validator
+  mode: validator
+
+  rbac:
+    create: false
+  serviceAccount:
+    create: false
+
+  persistence:
+    enabled: true
+    existingClaim: rocketpool-smartnode-data
+
+  initContainers:
+    - name: wait-for-setup
+      image: busybox
+      command:
+        - sh
+        - -c
+        - while [ ! -f /data/setup-complete ]; do echo "Waiting for setup..."; sleep 5; done
+      volumeMounts:
+        - name: storage
+          mountPath: /data
+
 networkPolicy:
   create: false
 

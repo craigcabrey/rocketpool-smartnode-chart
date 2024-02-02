@@ -74,23 +74,23 @@ data:
       ultrasoundEnabled: false
     native:
       ccHttpUrl: http://{{ .Release.Name }}-rocketpool-primary-beacon:{{ include "rocketpool.primaryConsensusClient.httpPort" . }}
-      consensusClient: {{ include "rocketpool.primaryConsensusClient" . }}
+      consensusClient: {{ include "rocketpool.primaryConsensusClient.name" . }}
       ecHttpUrl: http://{{ .Release.Name }}-rocketpool-primary-execution:{{ include "rocketpool.primaryExecutionClient.httpPort" . }}
       validatorRestartCommand: /scripts/restart-validator.sh
       validatorStopCommand: /scripts/stop-validator.sh
     root:
       bnMetricsPort: {{ include "rocketpool.primaryConsensusClient.metricsPort" . }}
-      consensusClient: {{ include "rocketpool.primaryConsensusClient" . }}
+      consensusClient: {{ include "rocketpool.primaryConsensusClient.name" . }}
       consensusClientMode: external
       ecMetricsPort: {{ include "rocketpool.primaryExecutionClient.metricsPort" . }}
       enableBitflyNodeMetrics: false
       enableMetrics: {{ .Values.smartNode.metrics.enabled }}
       enableMevBoost: {{ .Values.mevBoost.enabled }}
       enableODaoMetrics: false
-      consensusClient: {{ include "rocketpool.primaryExecutionClient" . }}
+      consensusClient: {{ include "rocketpool.primaryConsensusClient.name" . }}
       executionClientMode: external
       exporterMetricsPort: "9103"
-      externalConsensusClient: {{ include "rocketpool.primaryConsensusClient" . }}
+      externalConsensusClient: {{ include "rocketpool.primaryConsensusClient.name" . }}
       isNative: true
       nodeMetricsPort: {{ .Values.smartNode.metrics.port }}
       reconnectDelay: 60s

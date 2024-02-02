@@ -1,4 +1,19 @@
 {{/*
+Ugly hack to workaround helm deficiencies
+*/}}
+{{- define "rocketpool.nodeType" -}}
+{{- if contains "primaryNode" .Template.BasePath }}
+primary
+{{- else }}
+fallback
+{{- end }}
+{{- end}}
+
+{{- define "magda.var_dump" -}}
+{{- . | mustToPrettyJson | printf "\nThe JSON output of the dumped var is: \n%s" | fail }}
+{{- end -}}
+
+{{/*
 Expand the name of the chart.
 */}}
 {{- define "rocketpool.name" -}}
