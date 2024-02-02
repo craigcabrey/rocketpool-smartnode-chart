@@ -39,6 +39,18 @@ if [ -z "${POD_NAME}" ]; then
   exit 1
 fi
 
+POD_STATUS=$(
+  kubectl get pod --no-headers \
+    --namespace "${NAMESPACE}" \
+    --selector job-name="${JOB_NAME}" \
+    --output custom-columns=status:.status.phase
+)
+
+if [ "${POD_STATUS}" = "Succeeded" ]; then
+  echo "Setup pod already exited! Perhaps you've already completed setup?"
+  exit 0
+fi
+
 echo "Waiting for setup pod to settle..."
 kubectl wait --for condition=Ready -n "${NAMESPACE}" "pod/${POD_NAME}"
 

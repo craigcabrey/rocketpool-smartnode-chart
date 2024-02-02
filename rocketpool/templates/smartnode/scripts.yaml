@@ -28,6 +28,11 @@ data:
     TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
     NAMESPACE=$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace)
 
+    # FIXME: race between getting called and post start script running
+    if ! command -v curl >/dev/null; then
+      sleep 15
+    fi
+
     curl \
       --cacert /var/run/secrets/kubernetes.io/serviceaccount/ca.crt \
       --header "Authorization: Bearer $TOKEN" \
@@ -58,6 +63,11 @@ data:
 
     TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
     NAMESPACE=$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace)
+
+    # FIXME: race between getting called and post start script running
+    if ! command -v curl >/dev/null; then
+      sleep 15
+    fi
 
     curl \
       --cacert /var/run/secrets/kubernetes.io/serviceaccount/ca.crt \
