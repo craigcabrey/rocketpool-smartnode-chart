@@ -27,37 +27,6 @@ rocketPool:
     password:
   smoothingPool: false
 
-mevBoost:
-  enabled: false
-  relays: []
-  port: 18550
-
-smartNode:
-  image:
-    repository: docker.io/rocketpool/smartnode
-    tag: ''
-
-  metrics:
-    enabled: true
-    port: 10000
-
-  persistence:
-    enabled: false
-
-watchtower:
-  enabled: true
-
-  image:
-    repository: docker.io/rocketpool/smartnode
-    tag: ''
-
-  metrics:
-    enabled: true
-    port: 10000
-
-  maxFeeOverride: 200
-  prioFeeOverride: 3
-
 _serviceBase: &service-base
   enabled: false
   metricsPort: 10000
@@ -66,6 +35,8 @@ _serviceBase: &service-base
     prometheus.io/port: '10000'
     prometheus.io/scrape: 'true'
   podLabels:
+    # FIXME: hack to make dashboard work
+    job: rocketpool
     rocketpool.net/network: *network
   rbac:
     create: false
@@ -75,18 +46,61 @@ _serviceBase: &service-base
 _primaryConsensusBase: &primary-consensus-base
   <<: *service-base
   nameOverride: rocketpool-primary-beacon
+  podLabels:
+    # FIXME: hack to make dashboard work
+    job: eth2
+    rocketpool.net/network: *network
 
 _primaryExecutionBase: &primary-execution-base
   <<: *service-base
   nameOverride: rocketpool-primary-execution
+  podLabels:
+    # FIXME: hack to make dashboard work
+    job: eth1
+    rocketpool.net/network: *network
 
 _fallbackConsensusBase: &fallback-consensus-base
   <<: *service-base
   nameOverride: rocketpool-fallback-beacon
+  podLabels:
+    # FIXME: hack to make dashboard work
+    job: fallback-eth2
+    rocketpool.net/network: *network
 
 _fallbackExecutionBase: &fallback-execution-base
   <<: *service-base
   nameOverride: rocketpool-fallback-execution
+  podLabels:
+    # FIXME: hack to make dashboard work
+    job: fallback-eth1
+    rocketpool.net/network: *network
+
+smartNode:
+  <<: *service-base
+  enabled: true
+
+  image:
+    repository: docker.io/rocketpool/smartnode
+    tag: ''
+
+  persistence:
+    enabled: false
+
+watchtower:
+  <<: *service-base
+  enabled: true
+
+  image:
+    repository: docker.io/rocketpool/smartnode
+    tag: ''
+
+  maxFeeOverride: 200
+  prioFeeOverride: 3
+
+mevBoost:
+  <<: *service-base
+  relays: []
+  port: 18550
 
 # See documentation for options:
 # https://github.com/ethpandaops/ethereum-helm-charts
@@ -221,6 +235,11 @@ _validatorBase: &validator-base
   <<: *service-base
   nameOverride: rocketpool-validator
   mode: validator
+
+  podLabels:
+    # FIXME: hack to make dashboard work
+    job: validator
+    rocketpool.net/network: *network
 
   persistence:
     enabled: true

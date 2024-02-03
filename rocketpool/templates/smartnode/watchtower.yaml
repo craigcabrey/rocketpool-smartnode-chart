@@ -23,14 +23,15 @@ spec:
   template:
     metadata:
       annotations:
-        prometheus.io/scrape: '{{ .Values.watchtower.metrics.enabled }}'
+        prometheus.io/scrape: 'true'
         prometheus.io/path: '/metrics'
-        prometheus.io/port: '{{ .Values.watchtower.metrics.port }}'
+        prometheus.io/port: '{{ .Values.watchtower.metricsPort }}'
       labels:
         app.kubernetes.io/component: watchtower
         app.kubernetes.io/part-of: rocketpool
         rocketpool.net/network: {{ .Values.global.main.network }}
         {{- include "rocketpool.labels" . | nindent 8 }}
+        {{- .Values.watchtower.podLabels | toYaml | nindent 8 }}
     spec:
       initContainers:
         - name: wait-for-setup
@@ -50,13 +51,13 @@ spec:
             - --metricsAddress
             - 0.0.0.0
             - --metricsPort
-            - '{{ .Values.watchtower.metrics.port }}'
+            - '{{ .Values.watchtower.metricsPort }}'
             - --settings
             - /data/user-settings.yml
             - watchtower
           ports:
             - name: metrics
-              containerPort: {{ .Values.watchtower.metrics.port }}
+              containerPort: {{ .Values.watchtower.metricsPort }}
               protocol: TCP
           volumeMounts:
             - mountPath: /data/user-settings.yml

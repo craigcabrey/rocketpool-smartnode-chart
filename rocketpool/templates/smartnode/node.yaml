@@ -17,14 +17,15 @@ spec:
   template:
     metadata:
       annotations:
-        prometheus.io/scrape: '{{ .Values.smartNode.metrics.enabled }}'
+        prometheus.io/scrape: 'true'
         prometheus.io/path: '/metrics'
-        prometheus.io/port: '{{ .Values.smartNode.metrics.port }}'
+        prometheus.io/port: '{{ .Values.smartNode.metricsPort }}'
       labels:
         app.kubernetes.io/component: smartnode
         app.kubernetes.io/part-of: rocketpool
         rocketpool.net/network: {{ .Values.global.main.network }}
         {{- include "rocketpool.labels" . | nindent 8 }}
+        {{- .Values.smartNode.podLabels | toYaml | nindent 8 }}
     spec:
       serviceAccountName: smartnode
       initContainers:
@@ -55,7 +56,7 @@ spec:
             - --metricsAddress
             - 0.0.0.0
             - --metricsPort
-            - '{{ .Values.smartNode.metrics.port }}'
+            - '{{ .Values.smartNode.metricsPort }}'
             - --settings
             - /data/user-settings.yml
             - node
@@ -70,7 +71,7 @@ spec:
                   - /scripts/post-start.sh
           ports:
             - name: metrics
-              containerPort: {{ .Values.smartNode.metrics.port }}
+              containerPort: {{ .Values.smartNode.metricsPort }}
               protocol: TCP
           volumeMounts:
             - name: config

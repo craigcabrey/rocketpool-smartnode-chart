@@ -41,14 +41,14 @@ data:
       jsonRpcUrl:
     {{- end }}
     mevBoost:
-      additionalFlags: ""
+      additionalFlags: ''
       aestusEnabled: false
       bloxRouteMaxProfitEnabled: false
       bloxRouteRegulatedEnabled: false
       edenEnabled: false
       enableRegulatedAllMev: false
       enableUnregulatedAllMev: false
-      externalUrl: ""
+      externalUrl: ''
       flashbotsEnabled: false
       mode: external
       openRpcPort: closed
@@ -67,33 +67,33 @@ data:
       consensusClientMode: external
       ecMetricsPort: {{ include "rocketpool.primaryExecutionClient.metricsPort" . }}
       enableBitflyNodeMetrics: false
-      enableMetrics: {{ .Values.smartNode.metrics.enabled }}
+      enableMetrics: true
       enableMevBoost: {{ .Values.mevBoost.enabled }}
       enableODaoMetrics: false
       executionClientMode: external
-      exporterMetricsPort: "9103"
+      exporterMetricsPort: 9103
       externalConsensusClient: {{ include "rocketpool.primaryConsensusClient.name" . }}
       isNative: true
-      nodeMetricsPort: {{ .Values.smartNode.metrics.port }}
+      nodeMetricsPort: {{ .Values.smartNode.metricsPort }}
       reconnectDelay: 60s
       rpDir: /data
       useFallbackClients: {{ .Values.fallbackNode.enabled }}
       vcMetricsPort: {{ include "rocketpool.validatorClient.metricsPort" . }}
       version: v{{ .Chart.AppVersion }}
-      watchtowerMetricsPort: {{ .Values.watchtower.metrics.port }}
+      watchtowerMetricsPort: {{ .Values.watchtower.metricsPort }}
     smartnode:
-      archiveECUrl: ""
-      checkpointRetentionLimit: "200"
+      archiveECUrl: ''
+      checkpointRetentionLimit: 200
       dataPath: /data/data
-      distributeThreshold: "1"
-      manualMaxFee: "0"
-      minipoolStakeGasThreshold: "150"
+      distributeThreshold: 1
+      manualMaxFee: 0
+      minipoolStakeGasThreshold: 150
       network: {{ .Values.global.main.network }}
-      priorityFee: "2"
+      priorityFee: 2
       projectName: rocketpool
-      recordCheckpointInterval: "45"
+      recordCheckpointInterval: 45
       recordsPath: /data/data/records
-      rewardsTreeCustomUrl: ""
+      rewardsTreeCustomUrl: ''
       rewardsTreeMode: download
       useRollingRecords: false
       watchtowerMaxFeeOverride: {{ .Values.watchtower.maxFeeOverride }}
