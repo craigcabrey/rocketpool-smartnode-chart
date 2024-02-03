@@ -5,8 +5,9 @@ metadata:
   name: {{ include "rocketpool.fullname" . }}-watchtower
   labels:
     app.kubernetes.io/component: watchtower
-    app.kubernetes.io/name: watchtower
     app.kubernetes.io/part-of: rocketpool
+    rocketpool.net/network: {{ .Values.global.main.network }}
+    {{- include "rocketpool.labels" . | nindent 4 }}
 spec:
   progressDeadlineSeconds: 600
   replicas: 1
@@ -14,8 +15,9 @@ spec:
   selector:
     matchLabels:
       app.kubernetes.io/component: watchtower
-      app.kubernetes.io/name: watchtower
       app.kubernetes.io/part-of: rocketpool
+      rocketpool.net/network: {{ .Values.global.main.network }}
+      {{- include "rocketpool.labels" . | nindent 6 }}
   strategy:
     type: Recreate
   template:
@@ -26,8 +28,9 @@ spec:
         prometheus.io/port: '{{ .Values.watchtower.metrics.port }}'
       labels:
         app.kubernetes.io/component: watchtower
-        app.kubernetes.io/name: watchtower
         app.kubernetes.io/part-of: rocketpool
+        rocketpool.net/network: {{ .Values.global.main.network }}
+        {{- include "rocketpool.labels" . | nindent 8 }}
     spec:
       initContainers:
         - name: wait-for-setup

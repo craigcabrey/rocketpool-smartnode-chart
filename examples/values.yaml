@@ -2,6 +2,8 @@ global:
   main:
     checkpointSync:
       enabled: true
+  validator:
+    lighthouse: true
 
 primaryNode:
   besu:
@@ -20,6 +22,3 @@ fallbackNode:
     enabled: true
   lighthouse:
     enabled: true
-
-lighthouse:
-  enabled: true

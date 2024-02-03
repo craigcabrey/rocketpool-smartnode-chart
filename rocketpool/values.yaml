@@ -2,7 +2,8 @@ global:
   checkpointSync:
     enabled: false
   main:
-    network: holesky
+    # FIXME: When overridden by a user values.yaml, it does not propagate throughout all references.
+    network: &network holesky
     # These depend on all clients using a consistent set of ports.
     engineEndpoint: http://{{ .Release.Name }}-rocketpool-{{- include "rocketpool.nodeType" . | trim -}}-execution:8551
     rpcEndpoint: http://{{ .Release.Name }}-rocketpool-{{- include "rocketpool.nodeType" . | trim -}}-execution:8545
@@ -19,7 +20,7 @@ rocketPool:
   bitflyNodeMetrics:
     bitflyEndpoint: https://beaconcha.in/api/v1/client/metrics
     bitflyMachineName: Smartnode
-    bitflySecret: ""
+    bitflySecret: ''
   rescueNode:
     enabled: false
     username:
@@ -34,28 +35,58 @@ mevBoost:
 smartNode:
   image:
     repository: docker.io/rocketpool/smartnode
-    tag: ""
+    tag: ''
 
   metrics:
     enabled: true
-    port: 9102
+    port: 10000
 
   persistence:
     enabled: false
 
 watchtower:
-  enabled: false
+  enabled: true
 
   image:
     repository: docker.io/rocketpool/smartnode
-    tag: ""
+    tag: ''
 
   metrics:
     enabled: true
-    port: 9102
+    port: 10000
 
   maxFeeOverride: 200
   prioFeeOverride: 3
+
+_serviceBase: &service-base
+  enabled: false
+  metricsPort: 10000
+  podAnnotations:
+    prometheus.io/path: /metrics
+    prometheus.io/port: '10000'
+    prometheus.io/scrape: 'true'
+  podLabels:
+    rocketpool.net/network: *network
+  rbac:
+    create: false
+  serviceAccount:
+    create: false
+
+_primaryConsensusBase: &primary-consensus-base
+  <<: *service-base
+  nameOverride: rocketpool-primary-beacon
+
+_primaryExecutionBase: &primary-execution-base
+  <<: *service-base
+  nameOverride: rocketpool-primary-execution
+
+_fallbackConsensusBase: &fallback-consensus-base
+  <<: *service-base
+  nameOverride: rocketpool-fallback-beacon
+
+_fallbackExecutionBase: &fallback-execution-base
+  <<: *service-base
+  nameOverride: rocketpool-fallback-execution
 
 # See documentation for options:
 # https://github.com/ethpandaops/ethereum-helm-charts
@@ -65,8 +96,7 @@ primaryNode:
 
   # Execution Layer clients
   besu:
-    enabled: false
-    nameOverride: rocketpool-primary-execution
+    <<: *primary-execution-base
     defaultCommandTemplate: |
       - sh
       - -ac
@@ -96,96 +126,39 @@ primaryNode:
       {{- range .Values.extraArgs }}
         {{ tpl . $ }}
       {{- end }}
-
-    rbac:
-      create: false
-    serviceAccount:
-      create: false
   erigon:
-    enabled: false
-    nameOverride: rocketpool-primary-execution
-    rbac:
-      create: false
-    serviceAccount:
-      create: false
+    <<: *primary-execution-base
   ethereumjs:
-    enabled: false
-    nameOverride: rocketpool-primary-execution
-    rbac:
-      create: false
-    serviceAccount:
-      create: false
+    <<: *primary-execution-base
   geth:
-    enabled: false
-    nameOverride: rocketpool-primary-execution
-    rbac:
-      create: false
-    serviceAccount:
-      create: false
+    <<: *primary-execution-base
   nethermind:
-    enabled: false
-    nameOverride: rocketpool-primary-execution
-    rbac:
-      create: false
-    serviceAccount:
-      create: false
+    <<: *primary-execution-base
   reth:
-    enabled: false
-    nameOverride: rocketpool-primary-execution
-
-    rbac:
-      create: false
-    serviceAccount:
-      create: false
+    <<: *primary-execution-base
 
   # Consensus Layer clients
   grandine:
-    enabled: false
-    nameOverride: rocketpool-primary-beacon
-    rbac:
-      create: false
-    serviceAccount:
-      create: false
+    <<: *primary-consensus-base
   lighthouse:
-    nameOverride: rocketpool-primary-beacon
+    <<: *primary-consensus-base
     image:
       tag: latest-modern
-
-    rbac:
-      create: false
-    serviceAccount:
-      create: false
   lodestar:
-    nameOverride: rocketpool-primary-beacon
-    rbac:
-      create: false
-    serviceAccount:
-      create: false
+    <<: *primary-consensus-base
   nimbus:
-    nameOverride: rocketpool-primary-beacon
-    rbac:
-      create: false
-    serviceAccount:
-      create: false
+    <<: *primary-consensus-base
   prysm:
-    nameOverride: rocketpool-primary-beacon
-    rbac:
-      create: false
-    serviceAccount:
-      create: false
+    <<: *primary-consensus-base
   teku:
-    nameOverride: rocketpool-primary-beacon
-    rbac:
-      create: false
-    serviceAccount:
-      create: false
+    <<: *primary-consensus-base
 
 fallbackNode:
   enabled: false
 
   # Execution Layer clients
   besu:
-    nameOverride: rocketpool-fallback-execution
+    <<: *fallback-execution-base
     defaultCommandTemplate: |
       - sh
       - -ac
@@ -215,93 +188,39 @@ fallbackNode:
       {{- range .Values.extraArgs }}
         {{ tpl . $ }}
       {{- end }}
-
-    rbac:
-      create: false
-    serviceAccount:
-      create: false
   erigon:
-    nameOverride: rocketpool-fallback-execution
-    rbac:
-      create: false
-    serviceAccount:
-      create: false
+    <<: *fallback-execution-base
   ethereumjs:
-    nameOverride: rocketpool-fallback-execution
-    rbac:
-      create: false
-    serviceAccount:
-      create: false
+    <<: *fallback-execution-base
   geth:
-    nameOverride: rocketpool-fallback-execution
-    rbac:
-      create: false
-    serviceAccount:
-      create: false
+    <<: *fallback-execution-base
   nethermind:
-    nameOverride: rocketpool-fallback-execution
-    rbac:
-      create: false
-    serviceAccount:
-      create: false
+    <<: *fallback-execution-base
   reth:
-    nameOverride: rocketpool-fallback-execution
-    rbac:
-      create: false
-    serviceAccount:
-      create: false
+    <<: *fallback-execution-base
 
   # Consensus Layer clients
   grandine:
-    nameOverride: rocketpool-fallback-beacon
-    rbac:
-      create: false
-    serviceAccount:
-      create: false
+    <<: *fallback-consensus-base
   lighthouse:
-    nameOverride: rocketpool-fallback-beacon
+    <<: *fallback-consensus-base
     image:
       tag: latest-modern
-
-    rbac:
-      create: false
-    serviceAccount:
-      create: false
   lodestar:
-    nameOverride: rocketpool-fallback-beacon
-    rbac:
-      create: false
-    serviceAccount:
-      create: false
+    <<: *fallback-consensus-base
   nimbus:
-    nameOverride: rocketpool-fallback-beacon
-    rbac:
-      create: false
-    serviceAccount:
-      create: false
+    <<: *fallback-consensus-base
   prysm:
-    nameOverride: rocketpool-fallback-beacon
-    rbac:
-      create: false
-    serviceAccount:
-      create: false
+    <<: *fallback-consensus-base
   teku:
-    nameOverride: rocketpool-fallback-beacon
-    rbac:
-      create: false
-    serviceAccount:
-      create: false
+    <<: *fallback-consensus-base
 
 # Validators
 
-grandine:
+_validatorBase: &validator-base
+  <<: *service-base
   nameOverride: rocketpool-validator
   mode: validator
-
-  rbac:
-    create: false
-  serviceAccount:
-    create: false
 
   persistence:
     enabled: true
@@ -313,14 +232,16 @@ grandine:
       command:
         - sh
         - -c
-        - while [ ! -f /data/data/validators/rp-fee-recipient-env.txt ]; do echo "Waiting for fee recipient..."; sleep 5; done
+        - while [ ! -f /data/data/validators/rp-fee-recipient-env.txt ]; do echo 'Waiting for fee recipient...'; sleep 5; done
       volumeMounts:
         - name: storage
           mountPath: /data
 
+grandine:
+  <<: *validator-base
+
 lighthouse:
-  nameOverride: rocketpool-validator
-  mode: validator
+  <<: *validator-base
   defaultValidatorCommandTemplate: |
     - sh
     - -ac
@@ -340,122 +261,20 @@ lighthouse:
     {{- range .Values.extraArgs }}
       {{ tpl . $ }}
     {{- end }}
-
-  rbac:
-    create: false
-  serviceAccount:
-    create: false
-
-  persistence:
-    enabled: true
-    existingClaim: rocketpool-smartnode-data
-
-  initContainers:
-    - name: wait-for-setup
-      image: busybox
-      command:
-        - sh
-        - -c
-        - while [ ! -f /data/data/validators/rp-fee-recipient-env.txt ]; do echo "Waiting for fee recipient..."; sleep 5; done
-      volumeMounts:
-        - name: storage
-          mountPath: /data
+  image:
+    tag: latest-modern
 
 lodestar:
-  nameOverride: rocketpool-validator
-  mode: validator
-
-  rbac:
-    create: false
-  serviceAccount:
-    create: false
-
-  persistence:
-    enabled: true
-    existingClaim: rocketpool-smartnode-data
-
-  initContainers:
-    - name: wait-for-setup
-      image: busybox
-      command:
-        - sh
-        - -c
-        - while [ ! -f /data/data/validators/rp-fee-recipient-env.txt ]; do echo "Waiting for fee recipient..."; sleep 5; done
-      volumeMounts:
-        - name: storage
-          mountPath: /data
+  <<: *validator-base
 
 nimbus:
-  nameOverride: rocketpool-validator
-  mode: validator
-
-  rbac:
-    create: false
-  serviceAccount:
-    create: false
-
-  persistence:
-    enabled: true
-    existingClaim: rocketpool-smartnode-data
-
-  initContainers:
-    - name: wait-for-setup
-      image: busybox
-      command:
-        - sh
-        - -c
-        - while [ ! -f /data/data/validators/rp-fee-recipient-env.txt ]; do echo "Waiting for fee recipient..."; sleep 5; done
-      volumeMounts:
-        - name: storage
-          mountPath: /data
+  <<: *validator-base
 
 prysm:
-  nameOverride: rocketpool-validator
-  mode: validator
-
-  rbac:
-    create: false
-  serviceAccount:
-    create: false
-
-  persistence:
-    enabled: true
-    existingClaim: rocketpool-smartnode-data
-
-  initContainers:
-    - name: wait-for-setup
-      image: busybox
-      command:
-        - sh
-        - -c
-        - while [ ! -f /data/data/validators/rp-fee-recipient-env.txt ]; do echo "Waiting for fee recipient..."; sleep 5; done
-      volumeMounts:
-        - name: storage
-          mountPath: /data
+  <<: *validator-base
 
 teku:
-  nameOverride: rocketpool-validator
-  mode: validator
-
-  rbac:
-    create: false
-  serviceAccount:
-    create: false
-
-  persistence:
-    enabled: true
-    existingClaim: rocketpool-smartnode-data
-
-  initContainers:
-    - name: wait-for-setup
-      image: busybox
-      command:
-        - sh
-        - -c
-        - while [ ! -f /data/data/validators/rp-fee-recipient-env.txt ]; do echo "Waiting for fee recipient..."; sleep 5; done
-      volumeMounts:
-        - name: storage
-          mountPath: /data
+  <<: *validator-base
 
 networkPolicy:
   create: false
@@ -467,4 +286,4 @@ serviceAccount:
   annotations: {}
   # The name of the service account to use.
   # If not set and create is true, a name is generated using the fullname template
-  name: ""
+  name: ''

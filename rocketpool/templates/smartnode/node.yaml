@@ -4,14 +4,16 @@ metadata:
   name: {{ include "rocketpool.fullname" . }}-smartnode
   labels:
     app.kubernetes.io/component: smartnode
-    app.kubernetes.io/name: smartnode
     app.kubernetes.io/part-of: rocketpool
+    rocketpool.net/network: {{ .Values.global.main.network }}
+    {{- include "rocketpool.labels" . | nindent 4 }}
 spec:
   selector:
     matchLabels:
       app.kubernetes.io/component: smartnode
-      app.kubernetes.io/name: smartnode
       app.kubernetes.io/part-of: rocketpool
+      rocketpool.net/network: {{ .Values.global.main.network }}
+      {{- include "rocketpool.labels" . | nindent 6 }}
   template:
     metadata:
       annotations:
@@ -20,8 +22,9 @@ spec:
         prometheus.io/port: '{{ .Values.smartNode.metrics.port }}'
       labels:
         app.kubernetes.io/component: smartnode
-        app.kubernetes.io/name: smartnode
         app.kubernetes.io/part-of: rocketpool
+        rocketpool.net/network: {{ .Values.global.main.network }}
+        {{- include "rocketpool.labels" . | nindent 8 }}
     spec:
       serviceAccountName: smartnode
       initContainers:
