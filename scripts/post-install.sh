@@ -1,6 +1,6 @@
 #!/bin/sh
 
-SELECTOR="app.kubernetes.io/component=setup,app.kubernetes.io/name=rocketpool-cli,app.kubernetes.io/part-of=rocketpool"
+SELECTOR="app.kubernetes.io/component=setup,app.kubernetes.io/name=rocketpool,app.kubernetes.io/part-of=rocketpool"
 
 if ! command -v kubectl >/dev/null; then
   echo "No kubectl found! Are you running this from the same machine as helm?"

@@ -1,3 +1,7 @@
-Now run the post-install script `$ ./scripts/post-install.sh`.
+PLEASE READ!
 
-Note! Once the setup is complete, the smartnode pods will start. They will crashloop until the execution & consensus clients fully sync. This is expected behavior!
+Now run the post-install script `$ ./scripts/post-install.sh`.
+Note! Once setup is complete, the smartnode pods will start. Crashlooping is expected until the execution & consensus clients fully sync. This is expected behavior!
+{{ if not .Values.smartNode.persistence.existingClaim }}
+WARNING: You have not specified an existing volume claim! It is strongly recommended to use a preconfigured volume for a mainnet deployment.
+{{- end }}

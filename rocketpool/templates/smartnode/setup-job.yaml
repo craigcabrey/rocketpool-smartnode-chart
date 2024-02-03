@@ -4,10 +4,13 @@ metadata:
   name: {{ include "rocketpool.fullname" . }}-setup
   labels:
     app.kubernetes.io/component: setup
-    app.kubernetes.io/name: rocketpool-cli
-    app.kubernetes.io/part-of: rocketpool
+    {{- include "rocketpool.labels" . | nindent 4 }}
 spec:
   template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: setup
+        {{- include "rocketpool.labels" . | nindent 8 }}
     spec:
       initContainers:
         - name: init
@@ -39,12 +42,19 @@ spec:
                   - /bin/sh
                   - /scripts/post-start.sh
           volumeMounts:
+            - name: config
+              mountPath: /data/user-settings.yml
+              subPath: user-settings.yaml
             - name: data
               mountPath: /data
             - name: scripts
               mountPath: /scripts
               readOnly: true
       volumes:
+        - name: config
+          configMap:
+            defaultMode: 420
+            name: smartnode-config
         - name: data
           persistentVolumeClaim:
             claimName: rocketpool-smartnode-data

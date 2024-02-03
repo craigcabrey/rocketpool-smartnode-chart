@@ -5,7 +5,6 @@ metadata:
   name: {{ include "rocketpool.fullname" . }}-watchtower
   labels:
     app.kubernetes.io/component: watchtower
-    app.kubernetes.io/part-of: rocketpool
     {{- include "rocketpool.labels" . | nindent 4 }}
 spec:
   progressDeadlineSeconds: 600
@@ -14,7 +13,6 @@ spec:
   selector:
     matchLabels:
       app.kubernetes.io/component: watchtower
-      app.kubernetes.io/part-of: rocketpool
       {{- include "rocketpool.labels" . | nindent 6 }}
   strategy:
     type: Recreate
@@ -26,7 +24,6 @@ spec:
         prometheus.io/port: '{{ .Values.watchtower.metricsPort }}'
       labels:
         app.kubernetes.io/component: watchtower
-        app.kubernetes.io/part-of: rocketpool
         {{- include "rocketpool.labels" . | nindent 8 }}
         {{- .Values.watchtower.podLabels | toYaml | nindent 8 }}
     spec:

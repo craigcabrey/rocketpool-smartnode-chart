@@ -63,6 +63,7 @@ Selector labels
 {{- define "rocketpool.selectorLabels" -}}
 app.kubernetes.io/name: {{ include "rocketpool.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
+app.kubernetes.io/part-of: rocketpool
 {{- end }}
 
 {{/*

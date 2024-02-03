@@ -4,7 +4,7 @@ POD=$(
   kubectl get pod \
   --no-headers \
   --all-namespaces \
-  --selector app.kubernetes.io/component=smartnode,app.kubernetes.io/name=smartnode,app.kubernetes.io/part-of=rocketpool \
+  --selector app.kubernetes.io/component=smartnode,app.kubernetes.io/part-of=rocketpool \
   --output custom-columns=name:.metadata.name,namespace:.metadata.namespace
 )
 

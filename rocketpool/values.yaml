@@ -143,7 +143,8 @@ smartNode:
     tag: ''
 
   persistence:
-    enabled: false
+    existingClaim: ''
+    storageClass: ''
 
 watchtower:
   <<: *service-base
