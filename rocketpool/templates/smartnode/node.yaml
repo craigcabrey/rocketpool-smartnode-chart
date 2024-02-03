@@ -5,14 +5,12 @@ metadata:
   labels:
     app.kubernetes.io/component: smartnode
     app.kubernetes.io/part-of: rocketpool
-    rocketpool.net/network: {{ .Values.global.main.network }}
     {{- include "rocketpool.labels" . | nindent 4 }}
 spec:
   selector:
     matchLabels:
       app.kubernetes.io/component: smartnode
       app.kubernetes.io/part-of: rocketpool
-      rocketpool.net/network: {{ .Values.global.main.network }}
       {{- include "rocketpool.labels" . | nindent 6 }}
   template:
     metadata:
@@ -23,7 +21,6 @@ spec:
       labels:
         app.kubernetes.io/component: smartnode
         app.kubernetes.io/part-of: rocketpool
-        rocketpool.net/network: {{ .Values.global.main.network }}
         {{- include "rocketpool.labels" . | nindent 8 }}
         {{- .Values.smartNode.podLabels | toYaml | nindent 8 }}
     spec:

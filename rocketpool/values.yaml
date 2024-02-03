@@ -1,9 +1,116 @@
+# Begin helpers, see next section for configurables
+
+_serviceBase: &service-base
+  enabled: false
+  metricsPort: 10000
+  podAnnotations:
+    prometheus.io/path: /metrics
+    prometheus.io/port: '10000'
+    prometheus.io/scrape: 'true'
+  podLabels:
+    # FIXME: hack to make dashboard work
+    job: rocketpool
+  rbac:
+    create: false
+  serviceAccount:
+    create: false
+
+_consensusBase: &consensus-base
+  <<: *service-base
+  httpPort: 5052
+  p2pPort: 9000
+  rpcPort: 4000
+
+_primaryConsensusBase: &primary-consensus-base
+  <<: *consensus-base
+  nameOverride: rocketpool-primary-beacon
+  podLabels:
+    # FIXME: hack to make dashboard work
+    job: eth2
+
+_primaryExecutionBase: &primary-execution-base
+  <<: *service-base
+  nameOverride: rocketpool-primary-execution
+  podLabels:
+    # FIXME: hack to make dashboard work
+    job: eth1
+
+_fallbackConsensusBase: &fallback-consensus-base
+  <<: *consensus-base
+  nameOverride: rocketpool-fallback-beacon
+  podLabels:
+    # FIXME: hack to make dashboard work
+    job: fallback-eth2
+
+_fallbackExecutionBase: &fallback-execution-base
+  <<: *service-base
+  nameOverride: rocketpool-fallback-execution
+  podLabels:
+    # FIXME: hack to make dashboard work
+    job: fallback-eth1
+
+_validatorBase: &validator-base
+  <<: *service-base
+  nameOverride: rocketpool-validator
+  mode: validator
+
+  podLabels:
+    # FIXME: hack to make dashboard work
+    job: validator
+
+  persistence:
+    enabled: true
+    existingClaim: rocketpool-smartnode-data
+
+  initContainers:
+    - name: wait-for-setup
+      image: busybox
+      command:
+        - sh
+        - -c
+        - while [ ! -f /data/data/validators/rp-fee-recipient-env.txt ]; do echo 'Waiting for fee recipient...'; sleep 5; done
+      volumeMounts:
+        - name: storage
+          mountPath: /data
+
+_besu: &besu-base
+  defaultCommandTemplate: |
+    - sh
+    - -ac
+    - >
+      exec besu
+      --data-path=/data
+      --nat-method=KUBERNETES
+      --rpc-http-enabled
+      --rpc-http-host=0.0.0.0
+      --rpc-http-port={{ .Values.httpPort }}
+      --rpc-http-cors-origins=*
+      --rpc-ws-enabled
+      --rpc-ws-host=0.0.0.0
+      --rpc-ws-port={{ .Values.wsPort }}
+      --host-allowlist=*
+      --engine-jwt-secret=/data/jwt.hex
+      --engine-rpc-port={{ .Values.authPort }}
+      --engine-host-allowlist=*
+      --metrics-enabled
+      --metrics-host=0.0.0.0
+      --metrics-port={{ .Values.metricsPort }}
+      --data-storage-format=bonsai
+      --sync-mode=X_SNAP
+      --Xsnapsync-synchronizer-flat-db-healing-enabled=true
+      --fast-sync-min-peers=3
+      --rpc-http-max-active-connections=1024
+    {{- range .Values.extraArgs }}
+      {{ tpl . $ }}
+    {{- end }}
+
+# User configurable section
+
 global:
   checkpointSync:
     enabled: false
   main:
-    # FIXME: When overridden by a user values.yaml, it does not propagate throughout all references.
-    network: &network holesky
+    network: ''
     # These depend on all clients using a consistent set of ports.
     engineEndpoint: http://{{ .Release.Name }}-rocketpool-{{- include "rocketpool.nodeType" . | trim -}}-execution:8551
     rpcEndpoint: http://{{ .Release.Name }}-rocketpool-{{- include "rocketpool.nodeType" . | trim -}}-execution:8545
@@ -26,54 +133,6 @@ rocketPool:
     username:
     password:
   smoothingPool: false
-
-_serviceBase: &service-base
-  enabled: false
-  metricsPort: 10000
-  podAnnotations:
-    prometheus.io/path: /metrics
-    prometheus.io/port: '10000'
-    prometheus.io/scrape: 'true'
-  podLabels:
-    # FIXME: hack to make dashboard work
-    job: rocketpool
-    rocketpool.net/network: *network
-  rbac:
-    create: false
-  serviceAccount:
-    create: false
-
-_primaryConsensusBase: &primary-consensus-base
-  <<: *service-base
-  nameOverride: rocketpool-primary-beacon
-  podLabels:
-    # FIXME: hack to make dashboard work
-    job: eth2
-    rocketpool.net/network: *network
-
-_primaryExecutionBase: &primary-execution-base
-  <<: *service-base
-  nameOverride: rocketpool-primary-execution
-  podLabels:
-    # FIXME: hack to make dashboard work
-    job: eth1
-    rocketpool.net/network: *network
-
-_fallbackConsensusBase: &fallback-consensus-base
-  <<: *service-base
-  nameOverride: rocketpool-fallback-beacon
-  podLabels:
-    # FIXME: hack to make dashboard work
-    job: fallback-eth2
-    rocketpool.net/network: *network
-
-_fallbackExecutionBase: &fallback-execution-base
-  <<: *service-base
-  nameOverride: rocketpool-fallback-execution
-  podLabels:
-    # FIXME: hack to make dashboard work
-    job: fallback-eth1
-    rocketpool.net/network: *network
 
 smartNode:
   <<: *service-base
@@ -111,35 +170,7 @@ primaryNode:
   # Execution Layer clients
   besu:
     <<: *primary-execution-base
-    defaultCommandTemplate: |
-      - sh
-      - -ac
-      - >
-        exec besu
-        --data-path=/data
-        --nat-method=KUBERNETES
-        --rpc-http-enabled
-        --rpc-http-host=0.0.0.0
-        --rpc-http-port={{ .Values.httpPort }}
-        --rpc-http-cors-origins=*
-        --rpc-ws-enabled
-        --rpc-ws-host=0.0.0.0
-        --rpc-ws-port={{ .Values.wsPort }}
-        --host-allowlist=*
-        --engine-jwt-secret=/data/jwt.hex
-        --engine-rpc-port={{ .Values.authPort }}
-        --engine-host-allowlist=*
-        --metrics-enabled
-        --metrics-host=0.0.0.0
-        --metrics-port={{ .Values.metricsPort }}
-        --data-storage-format=bonsai
-        --sync-mode=X_SNAP
-        --Xsnapsync-synchronizer-flat-db-healing-enabled=true
-        --fast-sync-min-peers=3
-        --rpc-http-max-active-connections=1024
-      {{- range .Values.extraArgs }}
-        {{ tpl . $ }}
-      {{- end }}
+    <<: *besu-base
   erigon:
     <<: *primary-execution-base
   ethereumjs:
@@ -173,35 +204,7 @@ fallbackNode:
   # Execution Layer clients
   besu:
     <<: *fallback-execution-base
-    defaultCommandTemplate: |
-      - sh
-      - -ac
-      - >
-        exec besu
-        --data-path=/data
-        --nat-method=KUBERNETES
-        --rpc-http-enabled
-        --rpc-http-host=0.0.0.0
-        --rpc-http-port={{ .Values.httpPort }}
-        --rpc-http-cors-origins=*
-        --rpc-ws-enabled
-        --rpc-ws-host=0.0.0.0
-        --rpc-ws-port={{ .Values.wsPort }}
-        --host-allowlist=*
-        --engine-jwt-secret=/data/jwt.hex
-        --engine-rpc-port={{ .Values.authPort }}
-        --engine-host-allowlist=*
-        --metrics-enabled
-        --metrics-host=0.0.0.0
-        --metrics-port={{ .Values.metricsPort }}
-        --data-storage-format=bonsai
-        --sync-mode=X_SNAP
-        --Xsnapsync-synchronizer-flat-db-healing-enabled=true
-        --fast-sync-min-peers=3
-        --rpc-http-max-active-connections=1024
-      {{- range .Values.extraArgs }}
-        {{ tpl . $ }}
-      {{- end }}
+    <<: *besu-base
   erigon:
     <<: *fallback-execution-base
   ethereumjs:
@@ -230,31 +233,6 @@ fallbackNode:
     <<: *fallback-consensus-base
 
 # Validators
-
-_validatorBase: &validator-base
-  <<: *service-base
-  nameOverride: rocketpool-validator
-  mode: validator
-
-  podLabels:
-    # FIXME: hack to make dashboard work
-    job: validator
-    rocketpool.net/network: *network
-
-  persistence:
-    enabled: true
-    existingClaim: rocketpool-smartnode-data
-
-  initContainers:
-    - name: wait-for-setup
-      image: busybox
-      command:
-        - sh
-        - -c
-        - while [ ! -f /data/data/validators/rp-fee-recipient-env.txt ]; do echo 'Waiting for fee recipient...'; sleep 5; done
-      volumeMounts:
-        - name: storage
-          mountPath: /data
 
 grandine:
   <<: *validator-base
