@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: smartnode-config
+  name: {{ include "rocketpool.fullname" . }}-smartnode-config
 data:
   user-settings.yaml: |
     # FIXME: Use init container to inject credentials from a secret.
@@ -19,13 +19,13 @@ data:
       ccHttpUrl:
       ecHttpUrl:
     fallbackPrysm:
-      ccHttpUrl: http://{{ .Release.Name }}-rocketpool-fallback-beacon:{{ include "rocketpool.fallbackConsensusClient.httpPort" . }}
-      ecHttpUrl: http://{{ .Release.Name }}-rocketpool-fallback-execution:{{ include "rocketpool.fallbackExecutionClient.httpPort" . }}
+      ccHttpUrl: http://{{ .Release.Name }}-rocketpool-fallback-beacon:{{ (include "rocketpool.consensusClient" .Values.fallbackNode | fromJson).httpPort }}
+      ecHttpUrl: http://{{ .Release.Name }}-rocketpool-fallback-execution:{{ (include "rocketpool.executionClient" .Values.fallbackNode | fromJson).httpPort }}
       jsonRpcUrl: {{ .Values.rocketPool.fallbackNode.prysm.jsonRpcEndpoint }}
     {{- else }}
     fallbackNormal:
-      ccHttpUrl: http://{{ .Release.Name }}-rocketpool-fallback-beacon:{{ include "rocketpool.fallbackConsensusClient.httpPort" . }}
-      ecHttpUrl: http://{{ .Release.Name }}-rocketpool-fallback-execution:{{ include "rocketpool.fallbackExecutionClient.httpPort" . }}
+      ccHttpUrl: http://{{ .Release.Name }}-rocketpool-fallback-beacon:{{ (include "rocketpool.consensusClient" .Values.fallbackNode | fromJson).httpPort }}
+      ecHttpUrl: http://{{ .Release.Name }}-rocketpool-fallback-execution:{{ (include "rocketpool.executionClient" .Values.fallbackNode |  fromJson).httpPort }}
     fallbackPrysm:
       ccHttpUrl:
       ecHttpUrl:
@@ -56,23 +56,23 @@ data:
       selectionMode: profile
       ultrasoundEnabled: false
     native:
-      ccHttpUrl: http://{{ .Release.Name }}-rocketpool-primary-beacon:{{ include "rocketpool.primaryConsensusClient.httpPort" . }}
-      consensusClient: {{ include "rocketpool.primaryConsensusClient.name" . }}
-      ecHttpUrl: http://{{ .Release.Name }}-rocketpool-primary-execution:{{ include "rocketpool.primaryExecutionClient.httpPort" . }}
+      ccHttpUrl: http://{{ .Release.Name }}-rocketpool-primary-beacon:{{ (include "rocketpool.consensusClient" .Values.primaryNode | fromJson).httpPort }}
+      consensusClient: {{ (include "rocketpool.consensusClient" .Values.primaryNode | fromJson).name }}
+      ecHttpUrl: http://{{ .Release.Name }}-rocketpool-primary-execution:{{ (include "rocketpool.executionClient" .Values.primaryNode | fromJson).httpPort }}
       validatorRestartCommand: /scripts/restart-validator.sh
       validatorStopCommand: /scripts/stop-validator.sh
     root:
-      bnMetricsPort: {{ include "rocketpool.primaryConsensusClient.metricsPort" . }}
-      consensusClient: {{ include "rocketpool.primaryConsensusClient.name" . }}
+      bnMetricsPort: {{ (include "rocketpool.consensusClient" .Values.primaryNode | fromJson).metricsPort }}
+      consensusClient: {{ (include "rocketpool.consensusClient" .Values.primaryNode | fromJson).name }}
       consensusClientMode: external
-      ecMetricsPort: {{ include "rocketpool.primaryExecutionClient.metricsPort" . }}
+      ecMetricsPort: {{ (include "rocketpool.executionClient" .Values.primaryNode | fromJson).metricsPort }}
       enableBitflyNodeMetrics: false
       enableMetrics: true
       enableMevBoost: {{ .Values.mevBoost.enabled }}
       enableODaoMetrics: false
       executionClientMode: external
       exporterMetricsPort: 9103
-      externalConsensusClient: {{ include "rocketpool.primaryConsensusClient.name" . }}
+      externalConsensusClient: {{ (include "rocketpool.consensusClient" .Values.primaryNode | fromJson).name }}
       isNative: true
       nodeMetricsPort: {{ .Values.smartNode.metricsPort }}
       reconnectDelay: 60s

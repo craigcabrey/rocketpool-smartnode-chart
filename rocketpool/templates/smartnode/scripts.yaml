@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: smartnode-scripts
+  name: {{ include "rocketpool.fullname" . }}-smartnode-scripts
 data:
   post-start.sh: |
     #!/bin/sh

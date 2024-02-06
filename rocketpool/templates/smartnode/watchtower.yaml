@@ -69,8 +69,8 @@ spec:
         - name: config
           configMap:
             defaultMode: 420
-            name: smartnode-config
+            name: {{ include "rocketpool.fullname" . }}-smartnode-config
         - name: data
           persistentVolumeClaim:
-            claimName: rocketpool-smartnode-data
+            claimName: {{ include "rocketpool.fullname" . }}-smartnode-data
 {{- end }}

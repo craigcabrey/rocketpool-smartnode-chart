@@ -60,7 +60,7 @@ _validatorBase: &validator-base
 
   persistence:
     enabled: true
-    existingClaim: rocketpool-smartnode-data
+    existingClaim: replace-me-before-install
 
   initContainers:
     - name: wait-for-setup
@@ -188,8 +188,6 @@ primaryNode:
     <<: *primary-consensus-base
   lighthouse:
     <<: *primary-consensus-base
-    image:
-      tag: latest-modern
   lodestar:
     <<: *primary-consensus-base
   nimbus:
@@ -222,8 +220,6 @@ fallbackNode:
     <<: *fallback-consensus-base
   lighthouse:
     <<: *fallback-consensus-base
-    image:
-      tag: latest-modern
   lodestar:
     <<: *fallback-consensus-base
   nimbus:
@@ -259,8 +255,6 @@ lighthouse:
     {{- range .Values.extraArgs }}
       {{ tpl . $ }}
     {{- end }}
-  image:
-    tag: latest-modern
 
 lodestar:
   <<: *validator-base
