@@ -48,23 +48,29 @@ def executor_selection() -> str:
 
 
 def main() -> bool:
+    network = get_selection('Select network', NETWORK_CHOICES)
+    execution = executor_selection()
+    consensus = consensus_selection()
+
     values = {
         'global': {
-            'network': get_selection(
-                'Select network',
-                NETWORK_CHOICES,
-            ),
-            'checkpointSync': {
-                'enabled': False,
+            'main': {
+                'network': network,
+            },
+            'validator': {
+                consensus: True,
             },
         },
         'primaryNode': {
-            executor_selection(): {
+            execution: {
                 'enabled': True,
             },
-            consensus_selection(): {
+            consensus: {
                 'enabled': True,
             },
+        },
+        consensus: {
+            'persistence': f'{network}-rocketpool-smartnode-data',
         },
     }
 
@@ -83,7 +89,6 @@ def main() -> bool:
             },
         }
 
-
     with open('values.yaml', 'w') as outfile:
         yaml.dump(
             values,
@@ -92,7 +97,7 @@ def main() -> bool:
         )
 
     print(
-        f'Next, run `helm upgrade --install {values["global"]["network"]} '
+        f'Next, run `helm upgrade --install {network} '
         './rocketpool -f values.yaml -n rocketpool`'
     )
     return True

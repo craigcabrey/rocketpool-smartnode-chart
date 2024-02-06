@@ -64,7 +64,7 @@ _validatorBase: &validator-base
 
   initContainers:
     - name: wait-for-setup
-      image: busybox
+      image: docker.io/library/busybox
       command:
         - sh
         - -c
@@ -124,15 +124,45 @@ global:
     teku: false
 
 rocketPool:
+  addons-rescue-node:
+    enabled: false
+    username:
+    password:
   bitflyNodeMetrics:
     bitflyEndpoint: https://beaconcha.in/api/v1/client/metrics
     bitflyMachineName: Smartnode
     bitflySecret: ''
-  rescueNode:
-    enabled: false
-    username:
-    password:
-  smoothingPool: false
+  mevBoost:
+    additionalFlags: ''
+    aestusEnabled: false
+    bloxRouteMaxProfitEnabled: false
+    bloxRouteRegulatedEnabled: false
+    edenEnabled: false
+    enableRegulatedAllMev: false
+    enableUnregulatedAllMev: false
+    flashbotsEnabled: false
+    selectionMode: profile
+    ultrasoundEnabled: false
+  root:
+    enableBitflyNodeMetrics: false
+    enableODaoMetrics: false
+    executionClientMode: external
+    exporterMetricsPort: 9103
+    reconnectDelay: 60s
+  smartnode:
+    archiveECUrl: ''
+    checkpointRetentionLimit: 200
+    distributeThreshold: 1
+    manualMaxFee: 0
+    minipoolStakeGasThreshold: 150
+    priorityFee: 2
+    recordCheckpointInterval: 45
+    rewardsTreeCustomUrl: ''
+    rewardsTreeMode: download
+    useRollingRecords: false
+    watchtowerMaxFeeOverride: 200
+    watchtowerPrioFeeOverride: 3
+  extraConfig: {}
 
 smartNode:
   <<: *service-base
@@ -154,11 +184,13 @@ watchtower:
     repository: docker.io/rocketpool/smartnode
     tag: ''
 
-  maxFeeOverride: 200
-  prioFeeOverride: 3
-
 mevBoost:
   <<: *service-base
+
+  image:
+    repository: docker.io/flashbots/mev-boost
+    tag: 1.6
+
   relays: []
   port: 18550
 

@@ -59,11 +59,6 @@ data:
     /scripts/rocketpool service config
 
     touch /data/setup-complete
-
-    read -p "Node wallet needs to be initialized. Proceed? [y/N] " \
-      confirm && [[ $confirm == [yY] || $confirm == [yY][eE][sS] ]] || exit 0
-
-    /scripts/rocketpool wallet init
   stop-validator.sh: |
     #!/bin/sh
 

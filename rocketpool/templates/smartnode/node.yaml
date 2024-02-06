@@ -24,7 +24,7 @@ spec:
       serviceAccountName: smartnode
       initContainers:
         - name: wait-for-setup
-          image: busybox
+          image: docker.io/library/busybox
           command:
             - sh
             - -c
@@ -33,7 +33,7 @@ spec:
             - name: data
               mountPath: /data
         - name: chown-data
-          image: busybox
+          image: docker.io/library/busybox
           command:
             - chown
             - -R

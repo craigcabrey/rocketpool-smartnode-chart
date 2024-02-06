@@ -29,7 +29,7 @@ spec:
     spec:
       initContainers:
         - name: wait-for-setup
-          image: busybox
+          image: docker.io/library/busybox
           command:
             - sh
             - -c
@@ -60,11 +60,6 @@ spec:
             - mountPath: /data
               name: data
       restartPolicy: Always
-      securityContext:
-        fsGroup: 10001
-        runAsNonRoot: true
-        runAsGroup: 10001
-        runAsUser: 10001
       volumes:
         - name: config
           configMap:

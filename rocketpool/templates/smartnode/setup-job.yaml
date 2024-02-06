@@ -14,7 +14,7 @@ spec:
     spec:
       initContainers:
         - name: init
-          image: busybox
+          image: docker.io/library/busybox
           command:
             - chown
             - -R

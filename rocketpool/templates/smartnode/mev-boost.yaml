@@ -6,7 +6,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: mev-boost
+  name: {{ include "rocketpool.fullname" . }}-mev-boost
   labels:
     app.kubernetes.io/component: mev-boost
     {{- include "rocketpool.labels" . | nindent 4 }}
@@ -29,12 +29,12 @@ spec:
             - /app/mev-boost
           args:
             - -{{ .Values.global.main.network }}
-            - -addr=0.0.0.0:18550
+            - -addr=0.0.0.0:{{ .Values.mevBoost.port }}
             - -relay-check
-            - -relays={{ join "," .Values.rocketPool.mevBoost.relays }}
+            - -relays={{ join "," .Values.mevBoost.relays }}
           ports:
             - name: api
-              containerPort: 18550
+              containerPort: {{ .Values.mevBoost.port }}
               protocol: TCP
       restartPolicy: Always
 {{- end }}

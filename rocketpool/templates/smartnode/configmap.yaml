@@ -6,13 +6,13 @@ data:
   user-settings.yaml: |
     # FIXME: Use init container to inject credentials from a secret.
     addons-rescue-node:
-      enabled: {{ .Values.rocketPool.rescueNode.enabled }}
-      username: {{ .Values.rocketPool.rescueNode.username }}
-      password: {{ .Values.rocketPool.rescueNode.password }}
+      {{- if (get .Values.rocketPool "addons-rescue-node") }}
+      {{- (get .Values.rocketPool "addons-rescue-node") | toYaml | nindent 6 -}}
+      {{- end }}
     bitflyNodeMetrics:
-      bitflyEndpoint: {{ .Values.rocketPool.bitflyNodeMetrics.bitflyEndpoint }}
-      bitflyMachineName: {{ .Values.rocketPool.bitflyNodeMetrics.bitflyMachineName }}
-      bitflySecret: {{ .Values.rocketPool.bitflyNodeMetrics.bitflySecret }}
+      {{- if .Values.rocketPool.bitflyNodeMetrics }}
+      {{- .Values.rocketPool.bitflyNodeMetrics | toYaml | nindent 6 -}}
+      {{- end }}
     {{- if .Values.fallbackNode.enabled }}
     {{- if .Values.fallbackNode.prysm.enabled }}
     fallbackNormal:
@@ -41,60 +41,50 @@ data:
       jsonRpcUrl:
     {{- end }}
     mevBoost:
-      additionalFlags: ''
-      aestusEnabled: false
-      bloxRouteMaxProfitEnabled: false
-      bloxRouteRegulatedEnabled: false
-      edenEnabled: false
-      enableRegulatedAllMev: false
-      enableUnregulatedAllMev: false
       externalUrl: ''
-      flashbotsEnabled: false
       mode: external
       openRpcPort: closed
       port: {{ .Values.mevBoost.port }}
-      selectionMode: profile
-      ultrasoundEnabled: false
+      {{- if .Values.rocketPool.mevBoost }}
+      {{- .Values.rocketPool.mevBoost | toYaml | nindent 6 -}}
+      {{- end }}
     native:
       ccHttpUrl: http://{{ .Release.Name }}-rocketpool-primary-beacon:{{ (include "rocketpool.consensusClient" .Values.primaryNode | fromJson).httpPort }}
       consensusClient: {{ (include "rocketpool.consensusClient" .Values.primaryNode | fromJson).name }}
       ecHttpUrl: http://{{ .Release.Name }}-rocketpool-primary-execution:{{ (include "rocketpool.executionClient" .Values.primaryNode | fromJson).httpPort }}
       validatorRestartCommand: /scripts/restart-validator.sh
       validatorStopCommand: /scripts/stop-validator.sh
+      {{- if .Values.rocketPool.native }}
+      {{- .Values.rocketPool.native | toYaml | nindent 6 -}}
+      {{- end }}
     root:
       bnMetricsPort: {{ (include "rocketpool.consensusClient" .Values.primaryNode | fromJson).metricsPort }}
       consensusClient: {{ (include "rocketpool.consensusClient" .Values.primaryNode | fromJson).name }}
       consensusClientMode: external
       ecMetricsPort: {{ (include "rocketpool.executionClient" .Values.primaryNode | fromJson).metricsPort }}
-      enableBitflyNodeMetrics: false
       enableMetrics: true
       enableMevBoost: {{ .Values.mevBoost.enabled }}
-      enableODaoMetrics: false
       executionClientMode: external
       exporterMetricsPort: 9103
       externalConsensusClient: {{ (include "rocketpool.consensusClient" .Values.primaryNode | fromJson).name }}
       isNative: true
       nodeMetricsPort: {{ .Values.smartNode.metricsPort }}
-      reconnectDelay: 60s
       rpDir: /data
       useFallbackClients: {{ .Values.fallbackNode.enabled }}
       vcMetricsPort: {{ include "rocketpool.validatorClient.metricsPort" . }}
       version: v{{ .Chart.AppVersion }}
       watchtowerMetricsPort: {{ .Values.watchtower.metricsPort }}
+      {{- if .Values.rocketPool.root }}
+      {{- .Values.rocketPool.root | toYaml | nindent 6 -}}
+      {{- end }}
     smartnode:
-      archiveECUrl: ''
-      checkpointRetentionLimit: 200
       dataPath: /data/data
-      distributeThreshold: 1
-      manualMaxFee: 0
-      minipoolStakeGasThreshold: 150
       network: {{ .Values.global.main.network | required ".Values.global.main.network is required." }}
-      priorityFee: 2
       projectName: rocketpool
-      recordCheckpointInterval: 45
       recordsPath: /data/data/records
-      rewardsTreeCustomUrl: ''
-      rewardsTreeMode: download
-      useRollingRecords: false
-      watchtowerMaxFeeOverride: {{ .Values.watchtower.maxFeeOverride }}
-      watchtowerPrioFeeOverride: {{ .Values.watchtower.prioFeeOverride }}
+      {{- if .Values.rocketPool.smartnode }}
+      {{- .Values.rocketPool.smartnode | toYaml | nindent 6 -}}
+      {{- end }}
+    {{- if .Values.rocketPool.extraConfig }}
+    {{- .Values.rocketPool.extraConfig | toYaml | nindent 4 -}}
+    {{- end }}
