@@ -2,15 +2,16 @@
 
 
 import os
+import secrets
 import sys
 
 
 import yaml
 
 
-CONSENSUS_CHOICES = set(['lighthouse'])
-EXECUTOR_CHOICES = set(['besu', 'geth', 'reth'])
-NETWORK_CHOICES = set(['holesky', 'mainnet'])
+CONSENSUS_CHOICES = set(['lighthouse', 'lodestar', 'nimbus', 'prysm', 'teku'])
+EXECUTOR_CHOICES = set(['besu', 'geth', 'nethermind'])
+NETWORK_CHOICES = set(['holesky', 'mainnet', 'prater'])
 YES_NO_CHOICES = set(['yes', 'no'])
 
 
@@ -51,6 +52,7 @@ def main() -> bool:
     network = get_selection('Select network', NETWORK_CHOICES)
     execution = executor_selection()
     consensus = consensus_selection()
+    jwt = secrets.token_hex(32)
 
     values = {
         'global': {
@@ -64,13 +66,17 @@ def main() -> bool:
         'primaryNode': {
             execution: {
                 'enabled': True,
+                'jwt': jwt,
             },
             consensus: {
                 'enabled': True,
+                'jwt': jwt,
             },
         },
         consensus: {
-            'persistence': f'{network}-rocketpool-smartnode-data',
+            'persistence': {
+                'existingClaim': f'{network}-rocketpool-smartnode-data',
+            },
         },
     }
 
@@ -79,13 +85,16 @@ def main() -> bool:
             YES_NO_CHOICES,
             type=input_bool,
     ):
+        jwt = secrets.token_hex(32)
         values['fallbackNode'] = {
             'enabled': True,
             executor_selection(): {
                 'enabled': True,
+                'jwt': jwt,
             },
             consensus_selection(): {
                 'enabled': True,
+                'jwt': jwt,
             },
         }
 
