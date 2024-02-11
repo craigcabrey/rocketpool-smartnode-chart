@@ -1,21 +1,29 @@
 #!/bin/sh
+# vim: tabstop=2 softtabstop=2 shiftwidth=2 expandtab
 
-INSTANCE=
+NAMESPACE="rocketpool"
 SELECTOR="app.kubernetes.io/component=setup,app.kubernetes.io/name=rocketpool,app.kubernetes.io/part-of=rocketpool"
 
 usage() {
-  echo "Usage: ${0} [-i {instance}]"
+  echo "Usage: ${0} [OPTION]..."
   exit 1
 }
 
-while getopts 'i:' opt; do
-    case $opt in
-      (i)
-          INSTANCE="${OPTARG}"
-	  shift 2
-          ;;
-      (*) usage
-    esac
+while getopts 'hn:r:' opt; do
+  case $opt in
+    h)
+      usage
+      ;;
+    n)
+      NAMESPACE="${OPTARG}"
+      ;;
+    r)
+      SELECTOR="${SELECTOR},app.kubernetes.io/instance=${OPTARG}"
+      ;;
+    *)
+      usage
+      ;;
+  esac
 done
 
 if ! command -v kubectl >/dev/null; then
@@ -31,16 +39,6 @@ fi
 
 read -p "kubectl is configured for the cluster with rocketpool installed? (y/N): " \
   confirm && [[ $confirm == [yY] || $confirm == [yY][eE][sS] ]] || exit 1
-read -p "Enter installation namespace [rocketpool]: " NAMESPACE
-read -p "Helm release name (leave blank if only one release): " INSTANCE
-
-if [ -z "${NAMESPACE}" ]; then
-  NAMESPACE="rocketpool"
-fi
-
-if [ ! -z "${INSTANCE}" ]; then
-  SELECTOR="${SELECTOR},app.kubernetes.io/instance=${INSTANCE}"
-fi
 
 JOB_QUERY_RESULT=$(
   kubectl get job --no-headers \
@@ -57,7 +55,7 @@ if [ ${#JOBS[@]} -lt 1 ]; then
 fi
 
 if [ ${#JOBS[@]} -gt 1 ]; then
-  echo "More than one setup job found! Please specify the correct instance with -i."
+  echo "More than one setup job found! Please specify the correct release with -i."
   exit 1
 fi
 

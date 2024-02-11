@@ -1,4 +1,5 @@
 #!/bin/sh
+# vim: tabstop=2 softtabstop=2 shiftwidth=2 expandtab
 
 if [ -z "${DEBUG}" ]; then
   read -p "dev use only! if you don't know what you are doing, say no! you have been warned!" \

@@ -1,37 +1,67 @@
 #!/bin/sh
+# vim: tabstop=2 softtabstop=2 shiftwidth=2 expandtab
 
-INSTANCE=
+REPO=$(git rev-parse --show-toplevel)
+. "${REPO}/scripts/common.sh"
+
+NAMESPACE="rocketpool"
 SELECTOR="app.kubernetes.io/component=smartnode,app.kubernetes.io/part-of=rocketpool"
 
 usage() {
-  echo "Usage: ${0} {rocketpool-cli args}"
-  echo 'For example: rocketpool.sh node status'
-  echo 'To specify an instance, use -i {instance}'
+  echo "Usage: ${0} [OPTION]... [--] COMMAND [ARG]..."
+  echo -e "Run rocketpool COMMAND on a Helm deployment.\n"
+  echo "Options:"
+  echo "    -n NAMESPACE Specify a namespace (defaults to rocketpool)"
+  echo "    -r RELEASE   Specify a Helm release"
+  echo -e "    -h           Display this help and exit\n"
+  echo -e "Hint: Use -- to delineate parameters intended for rocketpoolcli\n"
+  echo "Examples:"
+  echo "  Query the node status:"
+  echo "    ${0} node status"
+  echo "  Query the version of the smartnode:"
+  echo "    ${0} -- --version"
+  echo "  Query the node status of a specific release:"
+  echo "    ${0} -r holesky node status"
   exit 1
 }
 
-while getopts 'i:' opt 2>/dev/null; do
-    case $opt in
-      (i)
-          INSTANCE="${OPTARG}"
-	  shift 2
-          ;;
-      (*) break
-    esac
+while getopts "hn:r:" opt; do
+  debug "$opt at $OPTIND has $OPTARG"
+  case $opt in
+    h)
+      usage
+      ;;
+    n)
+      NAMESPACE="${OPTARG}"
+      ;;
+    r)
+      SELECTOR="${SELECTOR},app.kubernetes.io/instance=${OPTARG}"
+      ;;
+    *)
+      usage
+      ;;
+  esac
 done
+shift $((OPTIND - 1))
 
-if [ ! -z "${INSTANCE}" ]; then
-  SELECTOR="${SELECTOR},app.kubernetes.io/instance=${INSTANCE}"
+if [ "$1" = "--" ]; then
+  shift
 fi
 
 if [ $# -lt 1 ]; then
   usage
 fi
 
+debug "Namespace: ${NAMESPACE}, Selector: ${SELECTOR}, Args: ${@}"
+
+if [ ! -z "${RKT_DEBUG}" ]; then
+  exit 0
+fi
+
 POD_QUERY_RESULT=$(
   kubectl get pod \
   --no-headers \
-  --all-namespaces \
+  --namespace "${NAMESPACE}" \
   --selector "${SELECTOR}" \
   --output custom-columns=name:.metadata.name
 )
@@ -44,23 +74,12 @@ if [ ${#PODS[@]} -lt 1 ]; then
 fi
 
 if [ ${#PODS[@]} -gt 1 ]; then
-  echo "More than one deployment found! Please specify the correct instance with -i."
+  echo "More than one deployment found! Please specify the correct release with -r."
   exit 1
 fi
-
-POD_QUERY_RESULT=$(
-  kubectl get pod \
-  --no-headers \
-  --all-namespaces \
-  --selector "${SELECTOR}" \
-  --output custom-columns=name:.metadata.name,namespace:.metadata.namespace
-)
-
-POD_NAME=$(echo $POD_QUERY_RESULT | awk '{print $1}')
-NAMESPACE=$(echo $POD_QUERY_RESULT | awk '{print $2}')
 
 kubectl exec --stdin --tty \
   --namespace "${NAMESPACE}" \
   --container smartnode \
-  $POD_NAME \
+  "${POD_QUERY_RESULT}" \
   -- /scripts/rocketpool $@

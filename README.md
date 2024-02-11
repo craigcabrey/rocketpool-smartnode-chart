@@ -36,6 +36,7 @@
 
 See `example/values.yaml` for an extremely minimal setup.
 
-## Smartnode & Watchtower crashing after install
+## Known Issues
 
-This is expected. Once the executor and consensus clients sync, the smartnode containers will "settle".
+* **Smartnode & Watchtower crashing after install** This is expected. Once the executor and consensus clients sync, the smartnode containers will "settle".
+* **Error when joining smoothing pool** If you see something like the following, it's an issue with the CLI communicating with the rocketpool daemon. The command still went through (confirm with `node status`): `Could not decode set-smoothing-pool-status response: json: cannot unmarshal object into Go struct field SetSmoothingPoolRegistrationStatusResponse.Status of type string`
