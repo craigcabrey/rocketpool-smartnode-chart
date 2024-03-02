@@ -48,7 +48,7 @@ spec:
           imagePullPolicy: IfNotPresent
           args:
             - --metricsAddress
-            - 0.0.0.0
+            - '[::]'
             - --metricsPort
             - '{{ .Values.smartNode.metricsPort }}'
             - --settings

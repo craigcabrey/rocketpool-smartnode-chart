@@ -1,0 +1,65 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "rocketpool.fullname" . }}-primary-execution
+  labels:
+    {{ include "rocketpool.labels" . }}
+spec:
+  endpoints:
+    - interval: 1m
+      scrapeTimeout: 30s
+      honorLabels: true
+      port: metrics
+      path: /metrics
+      scheme: http
+  jobLabel: {{ .Values.global.main.network }}
+  selector:
+    matchLabels:
+      {{ include "rocketpool.selectorLabels" . }}
+  namespaceSelector:
+    matchNames:
+      - {{ .Release.Namespace }}
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "rocketpool.fullname" . }}-primary-beacon
+  labels:
+    {{ include "rocketpool.labels" . }}
+spec:
+  endpoints:
+    - interval: 1m
+      scrapeTimeout: 30s
+      honorLabels: true
+      port: metrics
+      path: /metrics
+      scheme: http
+  jobLabel: {{ .Values.global.main.network }}
+  selector:
+    matchLabels:
+      {{ include "rocketpool.selectorLabels" . }}
+  namespaceSelector:
+    matchNames:
+      - {{ .Release.Namespace }}
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "rocketpool.fullname" . }}-validator
+  labels:
+    {{ include "rocketpool.labels" . }}
+spec:
+  endpoints:
+    - interval: 1m
+      scrapeTimeout: 30s
+      honorLabels: true
+      port: metrics
+      path: /metrics
+      scheme: http
+  jobLabel: {{ .Values.global.main.network }}
+  selector:
+    matchLabels:
+      {{ include "rocketpool.selectorLabels" . }}
+  namespaceSelector:
+    matchNames:
+      - {{ .Release.Namespace }}

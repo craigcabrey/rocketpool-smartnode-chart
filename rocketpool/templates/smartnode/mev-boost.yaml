@@ -23,13 +23,13 @@ spec:
     spec:
       containers:
         - name: mev-boost
-          image: flashbots/mev-boost:1.6
+          image: {{ .Values.mevBoost.image.repository }}:{{ .Values.mevBoost.image.tag }}
           imagePullPolicy: IfNotPresent
           command:
             - /app/mev-boost
           args:
             - -{{ .Values.global.main.network }}
-            - -addr=0.0.0.0:{{ .Values.mevBoost.port }}
+            - -addr=[::]:{{ .Values.mevBoost.port }}
             - -relay-check
             - -relays={{ join "," .Values.mevBoost.relays }}
           ports:
@@ -37,4 +37,20 @@ spec:
               containerPort: {{ .Values.mevBoost.port }}
               protocol: TCP
       restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "rocketpool.fullname" . }}-mev-boost
+  labels:
+    app.kubernetes.io/component: mev-boost
+    {{- include "rocketpool.labels" . | nindent 4 }}
+spec:
+  ports:
+    - name: http
+      port: {{ .Values.mevBoost.port }}
+      targetPort: {{ .Values.mevBoost.port }}
+  selector:
+    app.kubernetes.io/component: mev-boost
+    {{- include "rocketpool.labels" . | nindent 4 }}
 {{- end }}

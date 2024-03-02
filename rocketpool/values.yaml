@@ -54,14 +54,6 @@ _validatorBase: &validator-base
   nameOverride: rocketpool-validator
   mode: validator
 
-  podLabels:
-    # FIXME: hack to make dashboard work
-    job: validator
-
-  persistence:
-    enabled: true
-    existingClaim: replace-me-before-install
-
   initContainers:
     - name: wait-for-setup
       image: docker.io/library/busybox
@@ -72,6 +64,17 @@ _validatorBase: &validator-base
       volumeMounts:
         - name: storage
           mountPath: /data
+
+  podLabels:
+    # FIXME: hack to make dashboard work
+    job: validator
+
+  persistence:
+    enabled: true
+    existingClaim: replace-me-before-install
+
+  updateStrategy:
+    type: Recreate
 
 _besu: &besu-base
   defaultCommandTemplate: |
@@ -115,6 +118,7 @@ global:
     engineEndpoint: http://{{ .Release.Name }}-rocketpool-{{- include "rocketpool.nodeType" . | trim -}}-execution:8551
     rpcEndpoint: http://{{ .Release.Name }}-rocketpool-{{- include "rocketpool.nodeType" . | trim -}}-execution:8545
     beaconEndpoint: http://{{ .Release.Name }}-rocketpool-{{- include "rocketpool.nodeType" . | trim -}}-beacon:5052
+    mevBoostEndpoint: http://{{ .Release.Name }}-rocketpool-mev-boost:18550
   validator:
     grandine: false
     lighthouse: false
@@ -189,7 +193,7 @@ mevBoost:
 
   image:
     repository: docker.io/flashbots/mev-boost
-    tag: 1.6
+    tag: 1.7
 
   relays: []
   port: 18550
@@ -282,8 +286,10 @@ lighthouse:
       --suggested-fee-recipient $(cut -d'=' -f2 /data/data/validators/rp-fee-recipient-env.txt)
       --enable-doppelganger-protection
       --metrics
-      --metrics-address 0.0.0.0
+      --metrics-address ::
       --metrics-port {{ .Values.metricsPort }}
+      --builder-proposals
+      --prefer-builder-proposals
     {{- range .Values.extraArgs }}
       {{ tpl . $ }}
     {{- end }}
